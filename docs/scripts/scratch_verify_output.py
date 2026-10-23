@@ -7,6 +7,7 @@ import os
 import sys
 import re
 import docx
+from docx.oxml.ns import qn
 import fitz  # PyMuPDF
 
 DOCX_PATH = "output/Distributed_Design_Report_Draft_v2.docx"
@@ -136,6 +137,16 @@ class ReportVerifier:
         self.log_result("C. 图表检查", "正文 10 个专业三线表标题完整存在", len(tab_captions) == 10,
                         f"检测到 {len(tab_captions)} 个表注 (预期 10 个)")
 
+        # Check Table captions keep_with_next property
+        all_tab_caps_keep = True
+        tab_cap_paras = [p for p in doc.paragraphs if p.text.strip().startswith('表 ')]
+        for p in tab_cap_paras:
+            if not p.paragraph_format.keep_with_next:
+                all_tab_caps_keep = False
+                break
+        self.log_result("C. 图表检查", "所有表格表题均配置 keep_with_next 分页保护 (杜绝表题与表格分离)", all_tab_caps_keep,
+                        f"检测到 {len(tab_cap_paras)} 个表题，分页保护状态: {'全部合规启用' if all_tab_caps_keep else '存在未启用项'}")
+
     def verify_citations(self, doc):
         print("\n--- 检查项 D: 文献引用规范性、上标格式与编号闭环 ---")
         cited_numbers = set()
@@ -228,6 +239,29 @@ class ReportVerifier:
 
         self.log_result("E. 附录表格", "所有评分栏严格保持留空 (得分栏勿填)", score_cells_empty,
                         f"异常非空评分栏: {non_empty_scores}" if not score_cells_empty else "8 个评分栏严格保持空值")
+
+        # Verify Cover table 0 rating scores and evaluator fields are cleared
+        t0 = doc.tables[0]
+        r6 = [c.text.strip() for c in t0.rows[6].cells]
+        r7 = [c.text.strip() for c in t0.rows[7].cells]
+        cover_ratings_clean = (r6[1] == "" and r6[3] == "" and r7[1] == "" and r7[3] == "")
+        self.log_result("E. 封面与附录", "封面评定成绩与评定人严格留空 (清空模板示例成绩100与教师姓名)", cover_ratings_clean,
+                        f"Row6: {r6}, Row7: {r7}")
+
+        # Verify Appendix heading keep_with_next
+        app_heading = None
+        for p in doc.paragraphs:
+            if '附录 (得分栏勿填)' in p.text:
+                app_heading = p
+                break
+        app_keep = False
+        if app_heading is not None:
+            pPr = app_heading._p.get_or_add_pPr()
+            has_direct_kn = (pPr.find(qn('w:keepNext')) is not None) or (app_heading.paragraph_format.keep_with_next is True)
+            has_style_kn = bool(app_heading.style and app_heading.style.paragraph_format.keep_with_next)
+            app_keep = has_direct_kn or has_style_kn
+        self.log_result("E. 封面与附录", "附录标题配置 keep_with_next 并置于横向分节 (消除孤立标题)", app_keep,
+                        f"附录标题状态: {'存在且已生效分页保护 (Heading 1 / keep_with_next)' if app_keep else '异常'}")
 
     def verify_pdf_and_pagination(self, docx_doc):
         print("\n--- 检查项 F: PDF 导出、分页与页面方向检查 ---")

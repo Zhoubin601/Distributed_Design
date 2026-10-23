@@ -41,8 +41,11 @@ def update_cover_page(doc):
     t0.rows[5].cells[2].text = '[待填写]'
     t0.rows[5].cells[3].text = '[待填写]'
     
-    # 评定日期由教师评定时填写，不硬编码虚假日期
-    t0.rows[7].cells[3].text = '[待教师填写]'
+    # 评定成绩、评定人与评定日期属于教师评分栏，清空模板示例值（如 100、宋 杰、2025-11-22），严禁当作真实成绩
+    t0.rows[6].cells[1].text = ''
+    t0.rows[6].cells[3].text = ''
+    t0.rows[7].cells[1].text = ''
+    t0.rows[7].cells[3].text = ''
 
     for row in t0.rows:
         for cell in row.cells:

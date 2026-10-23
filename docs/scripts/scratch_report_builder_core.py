@@ -152,12 +152,14 @@ def add_body_p(doc, text, citations=None):
 def add_figure(doc, img_name, fig_num, caption):
     """
     插入图片与图注：图片居中，图注在图下方居中，仿宋五号加粗。
+    为图片段落设置 keep_with_next = True 避免图片与图注跨页分离。
     """
     img_path = os.path.join(IMAGE_DIR, img_name)
     if os.path.exists(img_path):
         p_img = insert_p(doc)
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         set_p_spacing(p_img, before=80, after=40)
+        p_img.paragraph_format.keep_with_next = True
         r_img = p_img.add_run()
         r_img.add_picture(img_path, width=Inches(6.0))
         
@@ -172,10 +174,12 @@ def add_figure(doc, img_name, fig_num, caption):
 def add_table_with_caption(doc, tab_num, caption, headers, rows_data, col_widths=None):
     """
     添加三线表与表注：表注在表格上方居中，仿宋五号加粗；三线表顶底粗线、表头下细线。
+    为表题设置 keep_with_next = True，确保表题绝不孤立滞留在前页底部，与后续表格始终保持在一起。
     """
     p_cap = insert_p(doc)
     p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
     set_p_spacing(p_cap, before=80, after=30)
+    p_cap.paragraph_format.keep_with_next = True
     r_cap = p_cap.add_run(f"表 {tab_num}  {caption}")
     set_run_font(r_cap, east_asia='FangSong', size_pt=10.5, bold=True)
 
@@ -196,8 +200,13 @@ def add_table_with_caption(doc, tab_num, caption, headers, rows_data, col_widths
     )
     tblPr.append(tblBorders)
 
-    # 表头行
-    hdr_cells = table.rows[0].cells
+    # 表头行设置 (跨页重复表头与防止拆行)
+    hdr_row = table.rows[0]
+    hdr_trPr = hdr_row._tr.get_or_add_trPr()
+    hdr_trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
+    hdr_trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+
+    hdr_cells = hdr_row.cells
     for i, h_text in enumerate(headers):
         hdr_cells[i].text = ''
         p = hdr_cells[i].paragraphs[0]
@@ -216,7 +225,11 @@ def add_table_with_caption(doc, tab_num, caption, headers, rows_data, col_widths
 
     # 数据行
     for r_idx, r_data in enumerate(rows_data):
-        row_cells = table.rows[r_idx + 1].cells
+        row = table.rows[r_idx + 1]
+        row_trPr = row._tr.get_or_add_trPr()
+        row_trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+
+        row_cells = row.cells
         for c_idx, cell_value in enumerate(r_data):
             row_cells[c_idx].text = ''
             p = row_cells[c_idx].paragraphs[0]

@@ -6,6 +6,8 @@ import os
 import sys
 import shutil
 import docx
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 from scratch_report_builder_core import (
     set_anchor, set_run_font, set_p_spacing, add_heading_1, add_heading_2, add_heading_3,
@@ -52,7 +54,24 @@ def main():
                 appendix_start_idx = i
                 break
 
-    anchor = elements[appendix_start_idx]
+    p_app = elements[appendix_start_idx]
+    p_sect = elements[appendix_start_idx + 1]
+
+    # 将分节符段落移至附录标题之前，使附录标题与表格一同完整置于 Section 1 (横向页面)，杜绝孤立标题
+    body.remove(p_sect)
+    p_app.addprevious(p_sect)
+
+    p_app_obj = docx.text.paragraph.Paragraph(p_app, doc)
+    pPr = p_app.get_or_add_pPr()
+    if pPr.find(qn('w:keepNext')) is None:
+        pStyle = pPr.find(qn('w:pStyle'))
+        if pStyle is not None:
+            pStyle.addnext(OxmlElement('w:keepNext'))
+        else:
+            pPr.insert(0, OxmlElement('w:keepNext'))
+
+    # 设置全局插入锚点为 p_sect，确保正文各章及参考文献全部生成在 Section 0 (纵向页面) 内
+    anchor = p_sect
     old_body_nodes = elements[15:appendix_start_idx]
 
     # 清理旧的正文占位节点
@@ -99,6 +118,20 @@ def main():
     # 5. 更新附录表格信息
     print(">>> 正在更新附录考核表数据...")
     update_appendix_table(doc)
+
+    # 确保附录标题段落配置 keep_with_next 分页保护
+    for p in doc.paragraphs:
+        if '附录 (得分栏勿填)' in p.text:
+            pPr = p._p.get_or_add_pPr()
+            if pPr.find(qn('w:keepNext')) is None:
+                pStyle = pPr.find(qn('w:pStyle'))
+                kn = OxmlElement('w:keepNext')
+                if pStyle is not None:
+                    pStyle.addnext(kn)
+                else:
+                    pPr.insert(0, kn)
+            p.paragraph_format.keep_with_next = True
+            break
 
     # 6. 保存文件并清理重复草稿
     os.makedirs(OUTPUT_DIR, exist_ok=True)

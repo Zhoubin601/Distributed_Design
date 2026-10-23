@@ -1,8 +1,9 @@
 # 数据库详细设计：雾桌在线虚拟桌游平台
 
 > 文档版本：v0.1（详细设计草案）  
-> 状态：用于课程设计讨论，尚非生产数据库迁移脚本。  
-> 依据：仓库中的 raw/要求.txt、docs/plan.md、docs/knowledge-map.md 与 docs/system-design.md。课程理论的最终术语核对仍以 raw/Introduction to Distributed System-by JieSong NEU.pdf 为准。
+> 状态：详细设计参考材料，尚非生产数据库迁移脚本。  
+> 依据：仓库中的 raw/要求.txt、docs/plan.md、docs/knowledge-map.md 与 docs/system-design.md。课程理论的最终术语核对仍以 raw/Introduction to Distributed System-by JieSong NEU.pdf 为准。  
+> **使用边界：** 本文件保留较细的数据结构草案供需要时参考。本轮不开展数据库字段级审查；最终概要设计报告只提取核心数据类别、持久化目的和事务原则，不复制字段、索引、SQL、锁顺序或租约实现细节。
 
 ## 1. 设计目标与边界
 

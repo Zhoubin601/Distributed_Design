@@ -18,8 +18,15 @@ def update_fields_and_export_pdf(docx_path, pdf_path):
     try:
         doc = word.Documents.Open(abs_docx)
         print("正在更新目录与所有字段...")
-        for toc in doc.TablesOfContents:
-            toc.Update()
+        print(f"检测到 Word 目录数量: {doc.TablesOfContents.Count}")
+        if doc.TablesOfContents.Count > 0:
+            for i in range(1, doc.TablesOfContents.Count + 1):
+                doc.TablesOfContents(i).Update()
+                print(f"已更新第 {i} 个目录")
+        else:
+            print("正在通过全局域更新目录...")
+            doc.Fields.Update()
+        
         doc.Fields.Update()
         
         # 保存更新后的 docx

@@ -36,17 +36,15 @@ def build_chapter_8(doc):
         "在分布式系统理论中，‘请求超时（Timeout）并不等同于操作执行失败’ [1, 2]。当客户端发起掷骰请求且未在预期时间内收到确认响应时，实际物理网络中可能存在三种不同情况："
         "① 请求报文在上传途中丢失，服务端未收到；"
         "② 服务端已成功接收并执行了本地事务提交，但在返回确认响应包时下行网络发生丢包；"
-        "③ 服务端正处于高负载排队中，请求正在处理但尚未完成响应。",
-        citations=[("‘请求超时（Timeout）并不等同于操作执行失败’ [1, 2]", "[2]")]
+        "③ 服务端正处于高负载排队中，请求正在处理但尚未完成响应。"
     )
     add_body_p(doc,
-        "针对上述不确定性，系统设计了基于全局唯一 `operationId` 的幂等控制机制："
-        "（1）客户端生成凭据：客户端在构造写操作请求时，在报文头附加全局唯一的 `operationId`（如 UUIDv4 标识）；"
-        "（2）服务端幂等记录与事务绑定：服务端在持久化存储中维护操作幂等记录表。在执行业务状态修改的同一个本地事务中，同步记录该 `operationId` 及其执行结果；"
-        "（3）重试幂等去重：当客户端因超时发起重试时，强制复用相同的 `operationId`。房间协作服务收到请求后，首先检索幂等记录："
-        "若命中已执行记录，则直接提取已持久化的历史结果（如点数 18）封装为确认响应返回，不重复执行掷骰或数据变更；"
-        "若检测到相同 `operationId` 正在被并发事务处理，则挂起等待或返回可重试状态码提示客户端稍后重试。"
-        "该机制通过服务端幂等记录与原子事务保证，有效规避了网络超时重试导致的操作重复执行副作用。其生效前提在于：客户端必须生成并维护全局唯一的 operationId，服务端必须在同一个原子事务中持久化操作输出，且幂等记录在时效期内不被提前清理。"
+        "针对上述网络不确定性，系统设计了基于 operationId 的幂等重试机制：客户端在构造写操作请求时附加全局唯一标识符 operationId（如 UUIDv4）；"
+        "服务端在持久化存储中，将业务状态变更与该 operationId 在同一个本地事务边界内原子提交。"
+        "当客户端因超时发起重试时，强制复用相同的 operationId。服务端收到重试请求后，优先检索幂等记录："
+        "若命中已提交记录，则直接返回原事务执行结果，避免重复执行掷骰或数据变更；"
+        "若检测到相同 operationId 正在被并发事务处理，则提示客户端稍后重试。"
+        "该机制以服务端原子事务与幂等记录为支撑，保证了网络超时重试时的操作安全性。其生效前提在于：客户端必须生成并维护全局唯一的 operationId，服务端必须在同一个原子事务中持久化操作输出，且幂等记录在时效期内不被提前清理。"
     )
 
     add_heading_3(doc, "(2) 客户端断线重连与增量/全量快照差分恢复流程")
@@ -60,12 +58,13 @@ def build_chapter_8(doc):
     add_body_p(doc,
         "结合图 6，系统对重连恢复的分支判定推导如下："
         "（1）重连发起与准入鉴权：客户端检测到底层网络连接断开后，启动指数退避重连。重新建连后发送重连信令，携带身份凭证、`roomId` 以及本端最后成功处理的事件序号 `last_seq`；"
-        "（2）落后步数计算与决策分流：服务端首先重新验证该用户的房间准入与权限（防止断网期间被移出房间）。随后提取当前房间的最新权威事件序号 `current_seq`，计算落后步数 Delta = current_seq - last_seq："
-        "① 增量补发路径（Delta Sync，轻度落后）：若 Delta > 0 且落后事件仍保存在服务端内存缓冲区或短周期事件存储窗口内，服务端直接从增量事件记录中检索区间 `(last_seq, current_seq]` 的有序事件列表，"
-        "经当前战争迷雾视野权限过滤后，打包推回给客户端。客户端按序回放事件补齐画面，传输开销较低；"
-        "② 全量快照重置路径（Snapshot Reset，长时间离线）：若客户端断线时间过长，Delta 超过了服务端缓冲区保留范围，或历史事件已被归档清理，服务端则调用状态序列化组件生成当前时刻的授权状态基准快照（Baseline Snapshot）。"
-        "快照包含预置地图标识、当前所有可见标记及其属性。客户端接收后基于基准快照重置本地图形上下文；"
-        "（3）就绪确认：无论采用增量补发还是全量快照重置，客户端完成状态同步后均向服务端发送同步就绪确认帧，重新切入正常监听状态。系统将‘恢复时间 ≤ 5秒’作为设计目标用于评估恢复策略的可行性，该指标在真实生产弱网环境下的表现仍需进一步测试验证。"
+        "服务端首先重新验证该用户的房间准入与权限（防止断网期间被移出房间）；"
+        "（2）落后步数计算与决策分流：服务端提取当前房间最新权威事件序号 `current_seq`，计算落后步数 Delta = current_seq - last_seq："
+        "① 增量补发路径（Delta Sync，轻度落后）：若 Delta 处于服务端保留的历史事件窗口内，服务端直接从增量事件记录中检索区间 `(last_seq, current_seq]` 的有序事件列表，"
+        "经当前战争迷雾视野权限过滤后，打包推回给客户端按序回放补齐画面，网络传输开销较低；"
+        "② 全量快照重置路径（Snapshot Reset，长时间离线）：若客户端断线时间过长超出历史保留窗口，服务端则调用状态序列化组件生成当前时刻的授权状态基准快照（Baseline Snapshot），"
+        "其原理参照经典分布式快照（Distributed Snapshot）状态截面理论 [11]。快照包含预置地图标识、当前所有可见标记及其属性，客户端接收后基于基准快照重置本地图形上下文；"
+        "（3）就绪确认：无论采用增量补发还是全量快照重置，客户端完成状态同步后均向服务端发送同步就绪确认帧，重新切入正常协同状态。系统将‘恢复时间 ≤ 5秒’作为设计目标用于指导差分恢复策略设计，该指标受网络环境与快照大小制约，未经实测验证。"
     )
 
     # 嵌入表 8-1
@@ -82,18 +81,16 @@ def build_chapter_8(doc):
     add_heading_3(doc, "(3) 协作服务进程故障接管与恢复前提边界")
     add_body_p(doc,
         "当负责某房间的协作服务实例发生故障时，系统依靠共享持久化存储进行状态恢复与接管。在此需要阐明故障接管的安全前提与潜在风险："
-        "必须防范‘假死脑裂（Split-Brain）’现象。假设服务实例 1 因遭遇长时间垃圾回收停顿或宿主机网络瞬断而与网关失去心跳联系，网关可能判定其离线并将该房间的协调职责分配给备用实例 2。"
-        "若实例 1 随后恢复运行并未感知到已被替代，若继续向持久化存储写入数据，可能导致两个实例并发修改同一房间数据，产生严重错乱。"
+        "必须防范‘假死脑裂（Split-Brain）’现象。假设服务实例 1 因网络抖动或长垃圾回收停顿与网关失去联系，网关判定其离线并将该房间的协调职责分配给备用实例 2。"
+        "若实例 1 随后恢复运行并未感知到已被替代，若继续向持久化存储写入数据，将造成多主并发写冲突与数据混乱。"
         "因此，故障接管机制在理论上必须引入带有租约（Lease）与递增任期号（Epoch / Fencing Token）的存储锁与准入隔离机制 [1, 2]：持久化存储在执行写入时强制核验任期标识，"
         "新实例接管时递增任期号，旧实例携带过期任期号发起的任何写操作将被底层存储拒绝，以此降低脑裂风险。"
-        "需要特别指出的是，本报告对服务实例接管与隔离机制的讨论属于概要设计层面的理论推导，在工程实践中依赖严格的时钟漂移控制、心跳超时阈值设定与存储层强原子条件更新能力，尚未在系统中实现完整的自动化接管测试。",
-        citations=[("带有租约（Lease）与递增任期号（Epoch / Fencing Token）的存储锁与准入隔离机制 [1, 2]", "[2]")]
+        "需要特别指出的是，本报告对服务实例接管与隔离机制的讨论属于概要设计层面的理论推导与安全模型约束，在工程实践中依赖严格的时钟漂移控制、心跳超时阈值设定与存储层强原子条件更新能力，属于设计目标，尚未在系统中实现完整的自动化接管测试。"
     )
 
     add_heading_3(doc, "(4) 课件理论分析：故障分类模型、可靠通信与 2PC/3PC 适用边界")
     add_body_p(doc,
-        "对照宋杰老师课件 Chapter 8（Fault Tolerance）关于容错理论与分布式提交协议的权威论述 [1]，系统建立如下理论映射：",
-        citations=[("Chapter 8（Fault Tolerance）关于容错理论与分布式提交协议的权威论述 [1]", "[1]")]
+        "对照宋杰老师课件 Chapter 8（Fault Tolerance）关于容错理论与分布式提交协议的权威论述 [1]，系统建立如下理论映射："
     )
     add_body_p(doc,
         "1. 故障模型界定（Fault Models）："
@@ -109,8 +106,7 @@ def build_chapter_8(doc):
     )
     add_body_p(doc,
         "3. 分布式两阶段提交（2PC）与三阶段提交（3PC）适用性论证："
-        "课件 Chapter 8 推导了两阶段提交（Two-Phase Commit, 2PC）与三阶段提交（3PC）在保障跨节点分布式事务原子性方面的机制与限制 [1, 10]。",
-        citations=[("两阶段提交（Two-Phase Commit, 2PC）与三阶段提交（3PC）在保障跨节点分布式事务原子性方面的机制与限制 [1, 10]", "[10]")]
+        "课件 Chapter 8 推导了两阶段提交（Two-Phase Commit, 2PC）与三阶段提交（3PC）在保障跨节点分布式事务原子性方面的机制与限制 [1, 10]。"
     )
     add_body_p(doc,
         "设计论证：2PC/3PC 适用于‘单个逻辑业务操作需要跨越多个独立的分布式资源管理器（如多个独立数据库或消息队列）保持原子提交’的场景。其代价是协调者单点阻塞、长时持有锁资源以及网络分区下的阻塞风险。"
@@ -127,8 +123,7 @@ def build_chapter_9(doc):
     add_body_p(doc,
         "本报告针对选题 B‘多人实时协作的在线虚拟桌游平台’，完成了一套面向课程要求的分布式系统概要设计说明书。"
         "系统紧扣分布式系统的核心特征与工程权衡展开设计，涵盖了《分布式系统导论》课程教学大纲与宋杰老师课件中 Chapter 1 至 Chapter 8 的核心理论模块 [1]，"
-        "尝试将理论概念与业务架构建立对应。课程核心知识点在系统设计中的应用与映射如表 9-1 所示。",
-        citations=[("Chapter 1 至 Chapter 8 的核心理论模块 [1]", "[1]")]
+        "尝试将理论概念与业务架构建立对应。课程核心知识点在系统设计中的应用与映射如表 9-1 所示。"
     )
 
     tab9_1_headers = ["课程课件章节", "核心概念与理论依据", "本系统概要设计中的具体映射与落地", "不采用或边界限定说明"]
@@ -139,7 +134,7 @@ def build_chapter_9(doc):
         ["Chapter 4 Communication", "RPC、瞬态通信、持久通信、面向流通信", "REST 接口与全双工长连接；增量事件持久化存储记录", "明确判定长连接/广播通知为瞬态，恢复依赖持久化记录"],
         ["Chapter 5 Naming", "平面命名、结构化命名、邀请凭证、DHT/Chord", "UUIDv4 实体全局唯一；邀请短码哈希；全局路由目录服务", "论证当前百级房间规模下自建 Chord 成本过高，排除 DHT"],
         ["Chapter 6 Synchronization", "物理时钟偏差、Lamport 时钟、互斥算法", "单房间权威串行排队 + 标记乐观版本控制；投骰因果序", "避免依赖物理时钟绝对同步；排除消息开销巨大的分布式互斥"],
-        ["Chapter 7 Consistency", "顺序一致性、客户中心读自身写、主备与Quorum", "核心数据顺序一致；本地读自身写；战争迷雾零信任投影", "采用成熟主备异步复制候选；指明 Quorum 适用边界"],
+        ["Chapter 7 Consistency", "顺序一致性、客户中心读自身写与乐观预览边界、主备与Quorum", "核心数据顺序一致；已提交写保障读自身写；前端推测预览解耦；战争迷雾零信任投影", "采用成熟主备异步复制候选；指明 Quorum 适用边界"],
         ["Chapter 8 Fault Tolerance", "故障模型、RPC幂等、崩溃恢复、2PC/3PC", "operationId 幂等记录；差分状态恢复流程；租约防脑裂讨论", "单库事务自足，论证当前阶段为何无需引入 2PC/3PC"]
     ]
     add_table_with_caption(doc, "9-1", "课程 Chapter 1–8 知识点在系统设计中的应用与映射对应表", tab9_1_headers, tab9_1_rows, [1.3, 1.6, 2.0, 1.8])
@@ -148,7 +143,7 @@ def build_chapter_9(doc):
     add_body_p(doc,
         "纵观全篇报告，本设计围绕实际业务需求与分布式系统基本原理展开推演，体现了以下设计取舍与思考："
         "（1）在体系结构选择上：基于多人在线桌游存在严格信息不对称（战争迷雾）与防作弊要求的业务特点，报告论证了全 P2P 架构在客户端作弊防范与弱网一致性上的局限，确立了分层客户端—服务器架构与单房间权威协调机制；"
-        "（2）在并发控制与同步上：避免在客户端复杂堆叠分布式互斥锁或多主 CRDT 算法，采用单房间权威排队与乐观版本号校验，实现了较为简洁的冲突检测与安全回滚流程，降低了系统整体协调开销；"
+        "（2）在并发控制与同步上：避免在客户端复杂堆叠分布式互斥锁或多主 CRDT 算法 [13]，采用单房间权威排队与乐观版本号校验，实现了较为简洁的冲突检测与安全回滚流程，降低了系统整体协调开销；"
         "（3）在通信与容错设计上：区分了瞬态通信通道与持久化状态记录的职责差异，认识到‘网络消息发送成功不等于客户端接收’以及‘网络请求超时不等于操作执行失败’的客观规律，结合唯一 `operationId` 幂等机制与差分状态恢复策略构建容错逻辑；"
         "（4）在安全边界防范上：确立零信任客户端原则，通过服务端差分投影机制限制未授权数据下发，有效规避了客户端内存窃取战争迷雾底层数据的作弊风险。"
     )
@@ -164,29 +159,29 @@ def build_chapter_9(doc):
         "上述局限性为系统后续的工程原型实现、性能基准测试与详细架构设计提供了明确的方向。"
     )
 
+REFERENCES = [
+    "[1] 宋杰. 分布式系统导论 (Introduction to Distributed System) [Z]. 东北大学软件学院教学课件, 2024.",
+    "[2] TANENBAUM A S, VAN STEEN M. Distributed systems: principles and paradigms [M]. 2nd ed. Upper Saddle River: Pearson Prentice Hall, 2007.",
+    "[3] LAMPORT L. Time, clocks, and the ordering of events in a distributed system [J]. Communications of the ACM, 1978, 21(7): 558-565.",
+    "[4] GIFFORD D K. Weighted voting for replicated data [C]//Proceedings of the seventh ACM symposium on Operating systems principles. 1979: 150-162.",
+    "[5] RICART G, AGRAWALA A K. An optimal algorithm for mutual exclusion in computer networks [J]. Communications of the ACM, 1981, 24(1): 8-17.",
+    "[6] MATTERN F. Virtual time and global states of distributed systems [C]//Parallel and Distributed Algorithms. North-Holland, 1989: 215-226.",
+    "[7] FIELDING R T. Architectural styles and the design of network-based software architectures [D]. Irvine: University of California, Irvine, 2000.",
+    "[8] FETTE I, MELNIKOV A. The WebSocket Protocol [R]. RFC 6455, 2011.",
+    "[9] Owlbear Rodeo. Owlbear Rodeo: A virtual tabletop for tabletop role-playing games [EB/OL]. (2020) [2026-10-23]. https://www.owlbear.rodeo.",
+    "[10] GRAY J. Notes on data base operating systems [M]//Operating Systems. Berlin: Springer, 1978: 393-481.",
+    "[11] CHANDY K M, LAMPORT L. Distributed snapshots: determining global states of distributed systems [J]. ACM Transactions on Computer Systems, 1985, 3(1): 63-75.",
+    "[12] VOGELS W. Eventually consistent [J]. Communications of the ACM, 2009, 52(1): 40-44.",
+    "[13] SHAPIRO M, PREGUIÇA N, BAQUERO C, et al. Conflict-free replicated data types [C]//Symposium on Self-Stabilizing Systems. Berlin: Springer, 2011: 386-400.",
+    "[14] STOICA I, MORRIS R, KARGER D, et al. Chord: A scalable peer-to-peer lookup service for internet applications [J]. ACM SIGCOMM Computer Communication Review, 2001, 31(4): 149-160.",
+    "[15] BIRMAN K P, JOSEPH T A. Reliable communication in the presence of failures [J]. ACM Transactions on Computer Systems, 1987, 5(1): 47-76."
+]
+
 def build_references(doc):
     """参考文献 (GB/T 7714 规范)"""
     add_heading_1(doc, "参考文献")
     
-    refs = [
-        "[1] 宋杰. 分布式系统导论 (Introduction to Distributed System) [Z]. 东北大学软件学院教学课件, 2024.",
-        "[2] TANENBAUM A S, VAN STEEN M. Distributed systems: principles and paradigms [M]. 2nd ed. Upper Saddle River: Pearson Prentice Hall, 2007.",
-        "[3] LAMPORT L. Time, clocks, and the ordering of events in a distributed system [J]. Communications of the ACM, 1978, 21(7): 558-565.",
-        "[4] GIFFORD D K. Weighted voting for replicated data [C]//Proceedings of the seventh ACM symposium on Operating systems principles. 1979: 150-162.",
-        "[5] RICART G, AGRAWALA A K. An optimal algorithm for mutual exclusion in computer networks [J]. Communications of the ACM, 1981, 24(1): 8-17.",
-        "[6] MATTERN F. Virtual time and global states of distributed systems [C]//Parallel and Distributed Algorithms. North-Holland, 1989: 215-226.",
-        "[7] FIELDING R T. Architectural styles and the design of network-based software architectures [D]. Irvine: University of California, Irvine, 2000.",
-        "[8] FETTE I, MELNIKOV A. The WebSocket Protocol [R]. RFC 6455, 2011.",
-        "[9] Owlbear Rodeo. Owlbear Rodeo: A virtual tabletop for tabletop role-playing games [EB/OL]. (2020) [2026-10-23]. https://www.owlbear.rodeo.",
-        "[10] GRAY J. Notes on data base operating systems [M]//Operating Systems. Berlin: Springer, 1978: 393-481.",
-        "[11] CHANDY K M, LAMPORT L. Distributed snapshots: determining global states of distributed systems [J]. ACM Transactions on Computer Systems, 1985, 3(1): 63-75.",
-        "[12] VOGELS W. Eventually consistent [J]. Communications of the ACM, 2009, 52(1): 40-44.",
-        "[13] SHAPIRO M, PREGUIÇA N, BAQUERO C, et al. Conflict-free replicated data types [C]//Symposium on Self-Stabilizing Systems. Berlin: Springer, 2011: 386-400.",
-        "[14] STOICA I, MORRIS R, KARGER D, et al. Chord: A scalable peer-to-peer lookup service for internet applications [J]. ACM SIGCOMM Computer Communication Review, 2001, 31(4): 149-160.",
-        "[15] BIRMAN K P, JOSEPH T A. Reliable communication in the presence of failures [J]. ACM Transactions on Computer Systems, 1987, 5(1): 47-76."
-    ]
-
-    for ref in refs:
+    for ref in REFERENCES:
         p = insert_p(doc, style='List Paragraph')
         set_p_spacing(p, before=24, after=24)
         pPr = p._p.get_or_add_pPr()

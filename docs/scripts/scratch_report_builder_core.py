@@ -5,6 +5,7 @@
 """
 
 import os
+import re
 import docx
 from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -43,6 +44,8 @@ def set_run_font(run, east_asia='SimSun', ascii_font='Times New Roman', size_pt=
     if superscript:
         run.font.superscript = True
     rPr = run._r.get_or_add_rPr()
+    if superscript and rPr.find(qn('w:noProof')) is None:
+        rPr.append(OxmlElement('w:noProof'))
     rFonts = rPr.find(qn('w:rFonts'))
     if rFonts is None:
         rFonts = OxmlElement('w:rFonts')
@@ -90,10 +93,45 @@ def add_heading_3(doc, text):
     set_run_font(r, east_asia='SimHei', size_pt=12, bold=True)
     return p
 
+CITATION_REGEX = re.compile(r'(\[\d+(?:,\s*\d+)*\])')
+
+def parse_body_text_segments(text, citations=None):
+    """
+    解析正文中的文本与上标引用片段：
+    - 自动识别正文中形如 [1]、[1, 7]、[9]、[1, 2] 的文献编号，并转换为上标引用；
+    - 若传入兼容参数 citations=[(marker, ref_str), ...]，先安全对齐锚点，避免产生 [9][9] 重复。
+    返回: list of (seg_text, is_superscript)
+    """
+    normalized_text = text
+    if citations:
+        for marker, ref_str in citations:
+            if marker in normalized_text:
+                # 检查 marker 是否已包含引用方括号
+                if re.search(r'\[\d+(?:,\s*\d+)*\]', marker):
+                    # marker 中本身已书写引用，无需重复追加
+                    pass
+                else:
+                    # 检查 normalized_text 中 marker 之后是否紧跟 ref_str
+                    idx = normalized_text.find(marker)
+                    after = normalized_text[idx + len(marker):]
+                    if not after.startswith(ref_str):
+                        normalized_text = normalized_text[:idx + len(marker)] + ref_str + after
+
+    tokens = CITATION_REGEX.split(normalized_text)
+    segments = []
+    for token in tokens:
+        if not token:
+            continue
+        if CITATION_REGEX.fullmatch(token):
+            segments.append((token, True))
+        else:
+            segments.append((token, False))
+    return segments
+
 def add_body_p(doc, text, citations=None):
     """
     添加标准正文段落：五号宋体，段前段后0.15行，单倍行距。首行缩进2字符。
-    citations: list of (str_marker, ref_num)
+    自动将 [1]、[1, 7] 等文献标记格式化为统一的上标引用。
     """
     p = insert_p(doc, style='Normal')
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -105,25 +143,10 @@ def add_body_p(doc, text, citations=None):
         pPr.append(ind)
     ind.set(qn('w:firstLineChars'), '200') # 首行缩进2字符
 
-    if not citations:
-        r = p.add_run(text)
-        set_run_font(r, east_asia='SimSun', size_pt=10.5)
-    else:
-        curr_text = text
-        segments = []
-        for marker, ref_str in citations:
-            if marker in curr_text:
-                idx = curr_text.find(marker)
-                before_str = curr_text[:idx + len(marker)]
-                curr_text = curr_text[idx + len(marker):]
-                segments.append((before_str, False))
-                segments.append((ref_str, True))
-        if curr_text:
-            segments.append((curr_text, False))
-        
-        for seg_text, is_sup in segments:
-            r = p.add_run(seg_text)
-            set_run_font(r, east_asia='SimSun', size_pt=10.5, superscript=is_sup)
+    segments = parse_body_text_segments(text, citations=citations)
+    for seg_text, is_sup in segments:
+        r = p.add_run(seg_text)
+        set_run_font(r, east_asia='SimSun', size_pt=10.5, superscript=is_sup)
     return p
 
 def add_figure(doc, img_name, fig_num, caption):

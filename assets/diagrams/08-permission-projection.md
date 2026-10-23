@@ -11,11 +11,11 @@ flowchart LR
     PROJECT["服务端按接收者生成可见状态投影"]
     HOST["主持人视图<br/>按主持人权限展示"]
     PLAYER["玩家视图<br/>仅包含获授权的场景信息"]
-    OBS["观察者视图<br/>只读且受房间规则限制"]
+    OBS["可选：观察者视图<br/>是否纳入待确认"]
     EVENT --> AUTH --> PROJECT
     PROJECT --> HOST
     PROJECT --> PLAYER
-    PROJECT --> OBS
+    PROJECT -. "可选扩展" .-> OBS
 ~~~
 
 **关键说明：**

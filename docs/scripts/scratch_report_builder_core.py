@@ -212,6 +212,7 @@ def add_table_with_caption(doc, tab_num, caption, headers, rows_data, col_widths
         p = hdr_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         set_p_spacing(p, before=30, after=30)
+        p.paragraph_format.keep_with_next = True
         r = p.add_run(h_text)
         set_run_font(r, east_asia='SimSun', size_pt=9.5, bold=True)
         # 表头下细线

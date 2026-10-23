@@ -47,14 +47,54 @@ def update_cover_page(doc):
     t0.rows[7].cells[1].text = ''
     t0.rows[7].cells[3].text = ''
 
+    # 优化 Row 0 行高与选题方向单元格（Cell 3）内边距，避免两行文本贴底拥挤
+    r0_trPr = t0.rows[0]._tr.get_or_add_trPr()
+    trHeight = r0_trPr.find(qn('w:trHeight'))
+    if trHeight is not None:
+        trHeight.set(qn('w:hRule'), 'atLeast')
+        trHeight.set(qn('w:val'), '640')
+    else:
+        r0_trPr.append(parse_xml(f'<w:trHeight {nsdecls("w")} w:hRule="atLeast" w:val="640"/>'))
+
+    c3 = t0.rows[0].cells[3]
+    c3_tcPr = c3._tc.get_or_add_tcPr()
+    vAlign = c3_tcPr.find(qn('w:vAlign'))
+    if vAlign is None:
+        c3_tcPr.append(parse_xml(f'<w:vAlign {nsdecls("w")} w:val="center"/>'))
+    else:
+        vAlign.set(qn('w:val'), 'center')
+    
+    tcMar = c3_tcPr.find(qn('w:tcMar'))
+    if tcMar is not None:
+        c3_tcPr.remove(tcMar)
+    c3_tcMar = parse_xml(
+        f'<w:tcMar {nsdecls("w")}>\n'
+        '  <w:top w:w="80" w:type="dxa"/>\n'
+        '  <w:bottom w:w="80" w:type="dxa"/>\n'
+        '  <w:left w:w="60" w:type="dxa"/>\n'
+        '  <w:right w:w="60" w:type="dxa"/>\n'
+        '</w:tcMar>'
+    )
+    c3_tcPr.append(c3_tcMar)
+
+    for p in c3.paragraphs:
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing = 1.05
+        set_p_spacing(p, before=10, after=10)
+        for r in p.runs:
+            set_run_font(r, east_asia='SimSun', size_pt=10.0)
+
     for row in t0.rows:
         for cell in row.cells:
+            if cell == c3:
+                continue
             for p in cell.paragraphs:
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                set_p_spacing(p, before=20, after=20)
                 for r in p.runs:
                     set_run_font(r, east_asia='SimSun', size_pt=10.5)
 
-    print("封面与团队信息表更新完成（评定日期规范设为待填写）")
+    print("封面与团队信息表更新完成（评定日期规范设为待填写，选题方向单元格排版优化完成）")
 
 def update_toc(doc):
     r"""

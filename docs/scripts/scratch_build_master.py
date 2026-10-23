@@ -133,6 +133,13 @@ def main():
             p.paragraph_format.keep_with_next = True
             break
 
+    # 确保全文所有表格数据行均配置 cantSplit 保护，杜绝任何表格单行跨页断裂
+    for tbl in doc.tables:
+        for r in tbl.rows:
+            r_trPr = r._tr.get_or_add_trPr()
+            if r_trPr.find(qn('w:cantSplit')) is None:
+                r_trPr.append(OxmlElement('w:cantSplit'))
+
     # 6. 保存文件并清理重复草稿
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     doc.save(OUTPUT_FILE_1)

@@ -147,6 +147,29 @@ class ReportVerifier:
         self.log_result("C. 图表检查", "所有表格表题均配置 keep_with_next 分页保护 (杜绝表题与表格分离)", all_tab_caps_keep,
                         f"检测到 {len(tab_cap_paras)} 个表题，分页保护状态: {'全部合规启用' if all_tab_caps_keep else '存在未启用项'}")
 
+        # Check Table header rows keep_with_next and cantSplit property
+        all_hdrs_keep = True
+        all_rows_cant_split = True
+        for tbl in doc.tables:
+            if len(tbl.rows) > 1 and len(tbl.columns) > 1:
+                hdr_tr = tbl.rows[0]._tr
+                trPr = hdr_tr.trPr
+                if trPr is not None and trPr.find(qn('w:tblHeader')) is not None:
+                    for c in tbl.rows[0].cells:
+                        for p in c.paragraphs:
+                            if not p.paragraph_format.keep_with_next:
+                                all_hdrs_keep = False
+                                break
+                for r in tbl.rows:
+                    r_trPr = r._tr.trPr
+                    if r_trPr is None or r_trPr.find(qn('w:cantSplit')) is None:
+                        all_rows_cant_split = False
+                        break
+        self.log_result("C. 图表检查", "所有数据表表头行配置 keep_with_next 保护 (杜绝表头与首行数据分离)", all_hdrs_keep,
+                        "10 个数据表表头行段落全部合规启用 keep_with_next" if all_hdrs_keep else "存在未启用表头")
+        self.log_result("C. 图表检查", "所有表格数据行配置 cantSplit 保护 (杜绝单行跨页拆分)", all_rows_cant_split,
+                        "表格所有数据行均合规启用 cantSplit 保护" if all_rows_cant_split else "存在未配置 cantSplit 的行")
+
     def verify_citations(self, doc):
         print("\n--- 检查项 D: 文献引用规范性、上标格式与编号闭环 ---")
         cited_numbers = set()
@@ -288,6 +311,78 @@ class ReportVerifier:
         self.log_result("F. PDF 分页", "PDF 附录末页实际渲染为横向", pdf_landscape,
                         f"末页尺寸: {last_page.rect.width:.1f} x {last_page.rect.height:.1f} pt")
 
+        # 验证 Page 1 封面选题方向单元格文本完整性与间距合理性
+        page1 = pdf[0]
+        p1_text = page1.get_text()
+        has_topic = ("选题方向" in p1_text and "多人实时协作" in p1_text and "虚拟桌游平台" in p1_text)
+        topic_b = [b for b in page1.get_text('blocks') if '虚拟桌游平台' in b[4]]
+        row1_b = [b for b in page1.get_text('blocks') if '组长' in b[4]]
+        space_ok = False
+        gap = 0.0
+        if topic_b and row1_b:
+            gap = row1_b[0][1] - topic_b[0][3]
+            space_ok = (gap >= 10.0)
+        self.log_result("F. PDF 分页", "PDF 第 1 页封面选题方向文本完整且文字与边框间距合理", has_topic and space_ok,
+                        f"文本完整性: {'正常' if has_topic else '缺失'}, 离下行文本间距: {gap:.1f} pt (避免贴底拥挤)" if (topic_b and row1_b) else f"文本完整性: {has_topic}")
+
+        # 验证 Table 6-1 在 PDF 中的实际分页与布局位置 (杜绝表题/表头孤立在页底)
+        tab6_1_pno = -1
+        for pno in range(4, len(pdf)):
+            t = pdf[pno].get_text()
+            if "表 6-1" in t and "分布式时钟与并发控制算法适用性对比分析表" in t:
+                tab6_1_pno = pno + 1
+                break
+        
+        tab6_1_page_text = pdf[tab6_1_pno - 1].get_text() if tab6_1_pno > 0 else ""
+        has_caption_6_1 = "表 6-1" in tab6_1_page_text
+        has_header_6_1 = ("同步 / 互斥技术机制" in tab6_1_page_text or "核心运作原理" in tab6_1_page_text)
+        has_row1_6_1 = ("物理时钟同步 (NTP)" in tab6_1_page_text or "网络时间协议" in tab6_1_page_text)
+        
+        # 确认前一页 (Page 16) 底部未残留表 6-1 表题或表头
+        p16_text = pdf[15].get_text() if len(pdf) >= 16 else ""
+        p16_no_orphan_tab6_1 = ("表 6-1  分布式时钟" not in p16_text and "同步 / 互斥技术机制" not in p16_text)
+
+        tab6_1_layout_ok = (tab6_1_pno == 17 and has_caption_6_1 and has_header_6_1 and has_row1_6_1 and p16_no_orphan_tab6_1)
+        self.log_result("F. PDF 分页", "PDF 表 6-1 表题、表头与数据行同页完整起始 (杜绝滞留前页底部孤立)", tab6_1_layout_ok,
+                        f"表 6-1 位于第 {tab6_1_pno} 页整洁起始, 表题/表头/数据行完整同页呈现, 第 16 页无孤立残留" if tab6_1_layout_ok else f"表 6-1 分页异常: pno={tab6_1_pno}, caption={has_caption_6_1}, header={has_header_6_1}, row1={has_row1_6_1}, p16_no_orphan={p16_no_orphan_tab6_1}")
+
+        # 验证正文其余 9 个三线表在 PDF 中均无表题孤立现象 (表题与首行数据同页)
+        all_tabs_ok = True
+        tab_issues = []
+        tables_to_check = [
+            ("1-1", "FR-01"),
+            ("1-2", "单房间承载规模"),
+            ("2-1", "权威状态管理"),
+            ("3-1", "客户端进程职责"),
+            ("4-1", "HTTPS/REST"),
+            ("5-1", "业务持久实体"),
+            ("7-1", "权威对局核心状态"),
+            ("8-1", "客户端网络突发闪断"),
+            ("9-1", "Chapter1Introduction")
+        ]
+        for tid, row_key in tables_to_check:
+            t_pno = -1
+            for pno in range(4, len(pdf)):
+                t = pdf[pno].get_text()
+                if f"表 {tid}" in t:
+                    for l in t.split('\n'):
+                        if l.strip().startswith(f"表 {tid}"):
+                            t_pno = pno + 1
+                            break
+                    if t_pno != -1:
+                        break
+            if t_pno == -1:
+                all_tabs_ok = False
+                tab_issues.append(f"表 {tid} 未找到表题")
+            else:
+                norm_p_text = pdf[t_pno - 1].get_text().replace('\n', '').replace(' ', '')
+                if row_key not in norm_p_text:
+                    all_tabs_ok = False
+                    tab_issues.append(f"表 {tid} 在第 {t_pno} 页缺少数据行")
+        
+        self.log_result("F. PDF 分页", "PDF 正文其余 9 个三线表表题与首行数据同页起始 (无孤立表题)", all_tabs_ok,
+                        "全部 9 个三线表表题与数据行同页合规呈现" if all_tabs_ok else f"异常表格: {tab_issues}")
+
         # 验证主要章节在 PDF 正文中的实际起始页码（跳过前 4 页封面与目录），并与目录页码比对
         def find_body_page(heading, sub_hint):
             for pno in range(4, len(pdf)):
@@ -298,6 +393,12 @@ class ReportVerifier:
 
         ch1_page = find_body_page("1. 系统简介", "1.1 系统背景与业务定位")
         ch2_page = find_body_page("2. 体系结构", "2.1 技术需求")
+        ch3_page = find_body_page("3. 进程", "3.1 技术需求")
+        ch4_page = find_body_page("4. 通信", "4.1 技术需求")
+        ch5_page = find_body_page("5. 命名", "5.1 技术需求")
+        ch6_page = find_body_page("6. 同步", "6.1 技术需求")
+        ch7_page = find_body_page("7. 一致性与复制", "7.1 技术需求")
+        ch8_page = find_body_page("8. 容错性与故障恢复", "8.1 技术需求")
         ch9_page = find_body_page("9. 总结", "9.1 系统设计与分布式知识点对应回顾")
         refs_page = find_body_page("参考文献", "东北大学软件学院教学课件")
         app_page = -1
@@ -307,9 +408,10 @@ class ReportVerifier:
                 app_page = pno + 1
                 break
 
-        pages_found = (ch1_page > 0 and ch2_page > 0 and ch9_page > 0 and refs_page > 0 and app_page > 0)
+        pages_found = (ch1_page > 0 and ch2_page > 0 and ch3_page > 0 and ch4_page > 0 and ch5_page > 0 and
+                       ch6_page > 0 and ch7_page > 0 and ch8_page > 0 and ch9_page > 0 and refs_page > 0 and app_page > 0)
         self.log_result("F. PDF 分页", "PDF 正文关键章节起始页定位正常", pages_found,
-                        f"第1章: 第{ch1_page}页, 第2章: 第{ch2_page}页, 第9章: 第{ch9_page}页, 参考文献: 第{refs_page}页, 附录: 第{app_page}页")
+                        f"第1章:{ch1_page}p, 第2章:{ch2_page}p, 第6章:{ch6_page}p, 第7章:{ch7_page}p, 第8章:{ch8_page}p, 第9章:{ch9_page}p, 参考文献:{refs_page}p, 附录:{app_page}p")
 
         # 从 docx 原生目录域超链接提取各章节的记录页码
         toc_recorded_pages = {}
@@ -331,31 +433,28 @@ class ReportVerifier:
 
         toc_aligned = True
         toc_align_details = []
-        if "1.系统简介" in toc_recorded_pages:
-            rec = toc_recorded_pages["1.系统简介"]
-            match = (rec == ch1_page)
-            if not match: toc_aligned = False
-            toc_align_details.append(f"第1章: 目录{rec}页/实测{ch1_page}页")
-        if "2.体系结构" in toc_recorded_pages:
-            rec = toc_recorded_pages["2.体系结构"]
-            match = (rec == ch2_page)
-            if not match: toc_aligned = False
-            toc_align_details.append(f"第2章: 目录{rec}页/实测{ch2_page}页")
-        if "9.总结" in toc_recorded_pages:
-            rec = toc_recorded_pages["9.总结"]
-            match = (rec == ch9_page)
-            if not match: toc_aligned = False
-            toc_align_details.append(f"第9章: 目录{rec}页/实测{ch9_page}页")
-        if "参考文献" in toc_recorded_pages:
-            rec = toc_recorded_pages["参考文献"]
-            match = (rec == refs_page)
-            if not match: toc_aligned = False
-            toc_align_details.append(f"参考文献: 目录{rec}页/实测{refs_page}页")
-        if "附录(得分栏勿填)" in toc_recorded_pages:
-            rec = toc_recorded_pages["附录(得分栏勿填)"]
-            match = (rec == app_page)
-            if not match: toc_aligned = False
-            toc_align_details.append(f"附录: 目录{rec}页/实测{app_page}页")
+        checks_map = [
+            ("1.系统简介", ch1_page, "第1章"),
+            ("2.体系结构", ch2_page, "第2章"),
+            ("3.进程", ch3_page, "第3章"),
+            ("4.通信", ch4_page, "第4章"),
+            ("5.命名", ch5_page, "第5章"),
+            ("6.同步", ch6_page, "第6章"),
+            ("7.一致性与复制", ch7_page, "第7章"),
+            ("8.容错性与故障恢复", ch8_page, "第8章"),
+            ("9.总结", ch9_page, "第9章"),
+            ("参考文献", refs_page, "参考文献"),
+            ("附录(得分栏勿填)", app_page, "附录")
+        ]
+        for key, actual_pno, label in checks_map:
+            if key in toc_recorded_pages:
+                rec = toc_recorded_pages[key]
+                match = (rec == actual_pno)
+                if not match: toc_aligned = False
+                toc_align_details.append(f"{label}:{rec}p/{actual_pno}p")
+            else:
+                toc_aligned = False
+                toc_align_details.append(f"{label}:缺失")
 
         self.log_result("F. PDF 分页", "Word 目录记录页码与 PDF 实际正文分页严格一致", toc_aligned,
                         ", ".join(toc_align_details) if toc_align_details else "目录页码已比对")

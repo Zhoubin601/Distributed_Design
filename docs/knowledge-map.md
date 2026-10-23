@@ -1,8 +1,8 @@
 # 课程知识点覆盖与写作检查表（v1.0）
 
 > **用途：** 为概要设计报告核对课程 Chapter 1–8 的覆盖情况，防止只介绍功能或只罗列技术名词。  
-> **理论主来源：** \`raw/Introduction to Distributed System-by JieSong NEU.pdf\`，课堂使用的《Introduction to Distributed System》。本文件依据已有课件阅读记录整理，正式写作时应回到 PDF 核对原文、图表与具体术语。  
-> **作业依据：** \`raw/要求.txt\` 要求对指定分布式系统进行概要设计，明确技术需求并运用所学知识，评分关注需求明确、设计完整、设计正确、自主知识运用、选题新颖和格式良好。  
+> **理论主来源：** `raw/Introduction to Distributed System-by JieSong NEU.pdf`，课堂使用的《Introduction to Distributed System》。本文件依据已有课件阅读记录整理，正式写作时应回到 PDF 核对原文、图表与具体术语。  
+> **作业依据：** `raw/要求.txt` 要求对指定分布式系统进行概要设计，明确技术需求并运用所学知识，评分关注需求明确、设计完整、设计正确、自主知识运用、选题新颖和格式良好。  
 > **设计主线：** 多个浏览器客户端通过网络共同操作同一桌游房间，系统需要处理通信延迟、并发修改、共享状态、命名、部分故障和恢复。  
 > **深度边界：** 这是知识覆盖清单，不是最终报告正文，也不是实现任务清单。每章要解释与系统有关的概念并作出设计判断，但不要求把课件中的每个算法都实现。
 
@@ -156,11 +156,11 @@
 
 - 本文件用于**检查覆盖情况**，不是让最终报告把所有条目逐条复制进去。
 - 正文优先解释分布式问题与设计逻辑；功能表和技术表服务于论证，不代替解释。
-- 从 \`docs/system-design.md\`、\`docs/database-design.md\`、\`docs/communication-protocol.md\`、\`docs/technology-comparison.md\` 和 \`docs/failure-scenarios.md\` 中只提取有助于解释课程知识的内容。
+- 从 `docs/system-design.md`、`docs/database-design.md`、`docs/communication-protocol.md`、`docs/technology-comparison.md` 和 `docs/failure-scenarios.md` 中只提取有助于解释课程知识的内容。
 - SQL 字段/索引、完整消息 JSON、事务锁顺序、租约续期数值、事件保留策略、完整故障测试脚本等进一步实现细节，不作为正文主线。
 - 不把候选设计写成已实现功能，不把设计目标写成实测结果，不承诺没有依据的性能、可用性或零数据丢失。
 - 课件未明确支持的内容不应伪装成课件原话；必要时明确标为“本项目的设计推导”或“补充方案比较”。
-- 最终报告的准确章节编号、图表数量和附录形式，以 \`raw/课程设计模板.docx\` 为准。
+- 最终报告的准确章节编号、图表数量和附录形式，以 `raw/课程设计模板.docx` 为准。
 
 ## 7. 课件核对记录
 

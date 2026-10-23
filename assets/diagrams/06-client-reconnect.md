@@ -1,23 +1,26 @@
 # 图 6：客户端断线重连与事件恢复
 
-**用途：** 区分事件补发和快照恢复两条路径。  
+**用途：** 区分授权事件补发、快照恢复和在线水位对账。  
 **建议报告位置：** 第 8 章“容错与恢复设计”。  
-**状态：** 与通信协议草案一致；事件保留策略仍待确认。
+**状态：** 与当前通信协议的游标和可见事件流模型对齐；对账频率仍待确认。
 
 ~~~mermaid
 flowchart TD
-    A["客户端重新连接<br/>发送 roomId 与 lastSequence"]
-    B["验证身份、成员状态与当前可见权限"]
-    C["查询房间当前 sequence 与事件保留范围"]
-    D{"缺失事件是否仍在日志中？"}
-    E["按 sequence 顺序补发缺失事件"]
-    F["生成当前权限下的快照投影"]
-    G["从 snapshotSequence + 1 补发后续事件"]
-    H["客户端校验并应用事件，更新 lastSequence"]
-    I["恢复完成"]
+    A["重新连接<br/>发送 resumeCursor、lastDeliverySequence、viewVersion"]
+    B["重新验证身份、成员状态与当前权限"]
+    C["从 resumeCursor 扫描内部 roomSequence 并生成授权投影"]
+    D{"游标有效且 viewVersion 未变化？"}
+    E["按 deliverySequence 连续补发可见事件"]
+    F["发送当前权限下的新快照<br/>重置视图事件进度"]
+    G["SYNC_WATERMARK<br/>latestDeliverySequence + resumeCursor"]
+    H{"客户端可见流是否落后？"}
+    I["继续补发并对账"]
+    J["恢复完成"]
     A --> B --> C --> D
-    D -- 是 --> E --> H --> I
-    D -- 否 --> F --> G --> H --> I
+    D -- 是 --> E --> G --> H
+    D -- 否 --> F --> E
+    H -- 是 --> I --> G
+    H -- 否 --> J
 ~~~
 
 **关键说明：**

@@ -41,6 +41,83 @@ EXPECTED_TABLE_CAPTIONS = [
     "1-1", "1-2", "2-1", "3-1", "4-1", "5-1", "6-1", "7-1", "8-1", "9-1"
 ]
 
+def get_content_tables(doc):
+    """
+    准确识别正文 10 个专业数据表，排除封面表、评分表、附录表等非目标表格。
+    返回列表: [(tab_id, caption, table), ...]
+    """
+    content_tables = []
+    for p in doc.paragraphs:
+        m = re.match(r'^表\s*(\d+-\d+)\s*(.*)', p.text.strip())
+        if m:
+            tid, cap = m.group(1), m.group(2).strip()
+            nxt = p._p.getnext()
+            while nxt is not None and nxt.tag != qn('w:tbl'):
+                nxt = nxt.getnext()
+            if nxt is not None:
+                for t in doc.tables:
+                    if t._tbl == nxt:
+                        content_tables.append((tid, cap, t))
+                        break
+    return content_tables
+
+def verify_single_table_structure(tbl, tab_id=""):
+    """
+    独立验证单张表格的结构属性（不依赖彼此状态，杜绝漏检）：
+    1. tblHeader: 表头行 (row 0) 是否包含 w:tblHeader
+    2. keep_with_next: 表头单元格内的所有段落是否设置了 keep_with_next (不论 tblHeader 存在与否均严格检查)
+    3. cantSplit: 表格所有行（特别是数据行）是否配置了 w:cantSplit
+    返回: dict(
+        has_tbl_header=bool,
+        all_header_p_keep=bool,
+        all_rows_cant_split=bool,
+        missing_header_p_cells=list,
+        missing_cant_split_rows=list,
+        is_valid=bool
+    )
+    """
+    has_tbl_header = False
+    if len(tbl.rows) > 0:
+        hdr_tr = tbl.rows[0]._tr
+        trPr = hdr_tr.trPr
+        if trPr is not None and trPr.find(qn('w:tblHeader')) is not None:
+            has_tbl_header = True
+
+    all_header_p_keep = True
+    missing_header_p_cells = []
+    if len(tbl.rows) > 0:
+        for c_idx, cell in enumerate(tbl.rows[0].cells):
+            for p_idx, p in enumerate(cell.paragraphs):
+                pPr = p._p.get_or_add_pPr()
+                has_kn = (p.paragraph_format.keep_with_next is True) or (pPr.find(qn('w:keepNext')) is not None)
+                if not has_kn:
+                    all_header_p_keep = False
+                    missing_header_p_cells.append((c_idx, p_idx))
+
+    all_rows_cant_split = True
+    missing_cant_split_rows = []
+    for r_idx, row in enumerate(tbl.rows):
+        r_trPr = row._tr.trPr
+        if r_trPr is None or r_trPr.find(qn('w:cantSplit')) is None:
+            all_rows_cant_split = False
+            missing_cant_split_rows.append(r_idx)
+
+    is_valid = has_tbl_header and all_header_p_keep and all_rows_cant_split
+    return {
+        "has_tbl_header": has_tbl_header,
+        "all_header_p_keep": all_header_p_keep,
+        "all_rows_cant_split": all_rows_cant_split,
+        "missing_header_p_cells": missing_header_p_cells,
+        "missing_cant_split_rows": missing_cant_split_rows,
+        "is_valid": is_valid
+    }
+
+def clean_pdf_txt(s):
+    # 去除引用编号[x]、标点符号、空格与空白符，便于稳健比对
+    s = re.sub(r'\[\d+(?:,\s*\d+)*\]', '', s)
+    s = re.sub(r'[ \t\r\n\(\)（）/\\:\-—_，。；、\u3000]', '', s)
+    return s
+
 class ReportVerifier:
     def __init__(self, docx_path, pdf_path):
         self.docx_path = docx_path
@@ -147,28 +224,34 @@ class ReportVerifier:
         self.log_result("C. 图表检查", "所有表格表题均配置 keep_with_next 分页保护 (杜绝表题与表格分离)", all_tab_caps_keep,
                         f"检测到 {len(tab_cap_paras)} 个表题，分页保护状态: {'全部合规启用' if all_tab_caps_keep else '存在未启用项'}")
 
-        # Check Table header rows keep_with_next and cantSplit property
-        all_hdrs_keep = True
-        all_rows_cant_split = True
-        for tbl in doc.tables:
-            if len(tbl.rows) > 1 and len(tbl.columns) > 1:
-                hdr_tr = tbl.rows[0]._tr
-                trPr = hdr_tr.trPr
-                if trPr is not None and trPr.find(qn('w:tblHeader')) is not None:
-                    for c in tbl.rows[0].cells:
-                        for p in c.paragraphs:
-                            if not p.paragraph_format.keep_with_next:
-                                all_hdrs_keep = False
-                                break
-                for r in tbl.rows:
-                    r_trPr = r._tr.trPr
-                    if r_trPr is None or r_trPr.find(qn('w:cantSplit')) is None:
-                        all_rows_cant_split = False
-                        break
-        self.log_result("C. 图表检查", "所有数据表表头行配置 keep_with_next 保护 (杜绝表头与首行数据分离)", all_hdrs_keep,
-                        "10 个数据表表头行段落全部合规启用 keep_with_next" if all_hdrs_keep else "存在未启用表头")
-        self.log_result("C. 图表检查", "所有表格数据行配置 cantSplit 保护 (杜绝单行跨页拆分)", all_rows_cant_split,
-                        "表格所有数据行均合规启用 cantSplit 保护" if all_rows_cant_split else "存在未配置 cantSplit 的行")
+        # 准确提取正文 10 个专业数据表（排除封面表、评分表、附录表）
+        content_tables = get_content_tables(doc)
+        found_target_tables = (len(content_tables) == 10)
+        self.log_result("C. 图表检查", "准确识别报告正文中的 10 张专业数据表 (排除封面与附录非目标表格)", found_target_tables,
+                        f"识别到目标表格 {len(content_tables)} 张 (预期 10 张): {[f'表 {t[0]}' for t in content_tables]}")
+
+        # 独立检查每张目标数据表的 tblHeader、keep_with_next 与 cantSplit
+        missing_tbl_header = []
+        missing_hdr_keep = []
+        missing_cant_split = []
+
+        for tid, cap, tbl in content_tables:
+            res = verify_single_table_structure(tbl, tid)
+            if not res["has_tbl_header"]:
+                missing_tbl_header.append(f"表 {tid}")
+            if not res["all_header_p_keep"]:
+                missing_hdr_keep.append(f"表 {tid} (单元格 {res['missing_header_p_cells']})")
+            if not res["all_rows_cant_split"]:
+                missing_cant_split.append(f"表 {tid} (行 {res['missing_cant_split_rows']})")
+
+        self.log_result("C. 图表检查", "所有目标数据表表头行独立配置 w:tblHeader 属性 (跨页重复表头)", len(missing_tbl_header) == 0,
+                        "全部 10 张数据表表头行均独立配置 w:tblHeader" if len(missing_tbl_header) == 0 else f"缺失 w:tblHeader 的表格: {missing_tbl_header}")
+
+        self.log_result("C. 图表检查", "所有目标数据表表头单元格段落独立配置 keep_with_next 保护 (杜绝表头与首行分离)", len(missing_hdr_keep) == 0,
+                        "全部 10 张数据表表头段落均合规启用 keep_with_next" if len(missing_hdr_keep) == 0 else f"存在未启用 keep_with_next 的表头: {missing_hdr_keep}")
+
+        self.log_result("C. 图表检查", "所有目标数据表所有行均独立配置 cantSplit 保护 (杜绝单行跨页拆分)", len(missing_cant_split) == 0,
+                        "全部 10 张数据表所有行均合规配置 cantSplit" if len(missing_cant_split) == 0 else f"存在未配置 cantSplit 的行: {missing_cant_split}")
 
     def verify_citations(self, doc):
         print("\n--- 检查项 D: 文献引用规范性、上标格式与编号闭环 ---")
@@ -311,77 +394,156 @@ class ReportVerifier:
         self.log_result("F. PDF 分页", "PDF 附录末页实际渲染为横向", pdf_landscape,
                         f"末页尺寸: {last_page.rect.width:.1f} x {last_page.rect.height:.1f} pt")
 
-        # 验证 Page 1 封面选题方向单元格文本完整性与间距合理性
+        # 验证 Page 1 封面选题方向单元格文本完整性与文本块垂直间距合理性
         page1 = pdf[0]
         p1_text = page1.get_text()
         has_topic = ("选题方向" in p1_text and "多人实时协作" in p1_text and "虚拟桌游平台" in p1_text)
-        topic_b = [b for b in page1.get_text('blocks') if '虚拟桌游平台' in b[4]]
-        row1_b = [b for b in page1.get_text('blocks') if '组长' in b[4]]
-        space_ok = False
+        blocks = page1.get_text('blocks')
+        topic_b = [b for b in blocks if '虚拟桌游平台' in b[4]]
+        row1_b = [b for b in blocks if '组长' in b[4]]
+
+        extracted_blocks = bool(topic_b and row1_b)
         gap = 0.0
-        if topic_b and row1_b:
+        space_ok = False
+        if extracted_blocks:
             gap = row1_b[0][1] - topic_b[0][3]
             space_ok = (gap >= 10.0)
-        self.log_result("F. PDF 分页", "PDF 第 1 页封面选题方向文本完整且文字与边框间距合理", has_topic and space_ok,
-                        f"文本完整性: {'正常' if has_topic else '缺失'}, 离下行文本间距: {gap:.1f} pt (避免贴底拥挤)" if (topic_b and row1_b) else f"文本完整性: {has_topic}")
+            cover_detail = f"选题方向文本完整性: 正常, 选题方向文本块与下一行文本块垂直间距: {gap:.1f} pt (阈值 >= 10.0 pt, 避免贴底拥挤)"
+        else:
+            cover_detail = f"未能提取到封面选题方向文本块或下一行(组长行)文本块: topic_found={bool(topic_b)}, row1_found={bool(row1_b)}"
 
-        # 验证 Table 6-1 在 PDF 中的实际分页与布局位置 (杜绝表题/表头孤立在页底)
+        self.log_result("F. PDF 分页", "PDF 第 1 页封面选题方向文本完整且选题方向文本块与下一行文本块垂直间距合理",
+                        has_topic and extracted_blocks and space_ok,
+                        cover_detail)
+
+        # 提取正文数据表供 PDF 分页核验
+        content_tables = get_content_tables(docx_doc)
+
+        # 验证 Table 6-1 在 PDF 中的实际分页与布局位置 (杜绝表题/表头孤立在页底，并核验全部 6 行数据)
         tab6_1_pno = -1
+        target_6_1 = "表" + clean_pdf_txt("6-1")
         for pno in range(4, len(pdf)):
             t = pdf[pno].get_text()
-            if "表 6-1" in t and "分布式时钟与并发控制算法适用性对比分析表" in t:
-                tab6_1_pno = pno + 1
+            for line in t.split('\n'):
+                line_c = clean_pdf_txt(line)
+                if line_c.startswith(target_6_1) and ("所示" not in line_c):
+                    tab6_1_pno = pno + 1
+                    break
+            if tab6_1_pno != -1:
                 break
         
         tab6_1_page_text = pdf[tab6_1_pno - 1].get_text() if tab6_1_pno > 0 else ""
         has_caption_6_1 = "表 6-1" in tab6_1_page_text
         has_header_6_1 = ("同步 / 互斥技术机制" in tab6_1_page_text or "核心运作原理" in tab6_1_page_text)
-        has_row1_6_1 = ("物理时钟同步 (NTP)" in tab6_1_page_text or "网络时间协议" in tab6_1_page_text)
-        
-        # 确认前一页 (Page 16) 底部未残留表 6-1 表题或表头
+        tab6_1_clean_text = clean_pdf_txt(tab6_1_page_text)
+
+        # 从 Word 动态提取 Table 6-1 的全部 6 行数据并在 PDF 中核验
+        tbl_6_1 = None
+        for tid, cap, t in content_tables:
+            if tid == "6-1":
+                tbl_6_1 = t
+                break
+
+        missing_rows_6_1 = []
+        if tbl_6_1 is not None and tab6_1_pno > 0:
+            for r_idx in range(1, len(tbl_6_1.rows)):
+                r_name = tbl_6_1.rows[r_idx].cells[0].text.strip()
+                kw = clean_pdf_txt(r_name)[:8]
+                if kw not in tab6_1_clean_text:
+                    missing_rows_6_1.append((r_idx, r_name))
+        else:
+            missing_rows_6_1.append((-1, "未在 Word 中定位到表 6-1 或 PDF 中未定位到第 17 页"))
+
+        has_all_6_rows = (len(missing_rows_6_1) == 0 and len(tbl_6_1.rows) == 7 if tbl_6_1 else False)
+
+        # 确认前一页 (Page 16) 底部未残留表 6-1 表题或表头孤立
         p16_text = pdf[15].get_text() if len(pdf) >= 16 else ""
         p16_no_orphan_tab6_1 = ("表 6-1  分布式时钟" not in p16_text and "同步 / 互斥技术机制" not in p16_text)
 
-        tab6_1_layout_ok = (tab6_1_pno == 17 and has_caption_6_1 and has_header_6_1 and has_row1_6_1 and p16_no_orphan_tab6_1)
-        self.log_result("F. PDF 分页", "PDF 表 6-1 表题、表头与数据行同页完整起始 (杜绝滞留前页底部孤立)", tab6_1_layout_ok,
-                        f"表 6-1 位于第 {tab6_1_pno} 页整洁起始, 表题/表头/数据行完整同页呈现, 第 16 页无孤立残留" if tab6_1_layout_ok else f"表 6-1 分页异常: pno={tab6_1_pno}, caption={has_caption_6_1}, header={has_header_6_1}, row1={has_row1_6_1}, p16_no_orphan={p16_no_orphan_tab6_1}")
+        tab6_1_layout_ok = (tab6_1_pno == 17 and has_caption_6_1 and has_header_6_1 and has_all_6_rows and p16_no_orphan_tab6_1)
+        self.log_result("F. PDF 分页", "PDF 表 6-1 表题、表头与全部 6 行数据同页完整呈现 (无孤立滞留与截断)", tab6_1_layout_ok,
+                        f"表 6-1 位于第 {tab6_1_pno} 页整洁起始, 表题/表头与全部 6 行数据同页完整呈现, 第 16 页无孤立残留" if tab6_1_layout_ok else f"表 6-1 异常: pno={tab6_1_pno}, 表题={has_caption_6_1}, 表头={has_header_6_1}, 缺少行={missing_rows_6_1}, p16无残留={p16_no_orphan_tab6_1}")
 
-        # 验证正文其余 9 个三线表在 PDF 中均无表题孤立现象 (表题与首行数据同页)
-        all_tabs_ok = True
-        tab_issues = []
-        tables_to_check = [
-            ("1-1", "FR-01"),
-            ("1-2", "单房间承载规模"),
-            ("2-1", "权威状态管理"),
-            ("3-1", "客户端进程职责"),
-            ("4-1", "HTTPS/REST"),
-            ("5-1", "业务持久实体"),
-            ("7-1", "权威对局核心状态"),
-            ("8-1", "客户端网络突发闪断"),
-            ("9-1", "Chapter1Introduction")
-        ]
-        for tid, row_key in tables_to_check:
-            t_pno = -1
+        # 验证正文全部 10 个专业数据表逐行数据在 PDF 中呈现、分页顺序及跨页续表头合规性
+        all_tables_pass = True
+        table_reports = []
+        table_failures = []
+        pdf_page_texts = [clean_pdf_txt(p.get_text()) for p in pdf]
+
+        for tid, cap, tbl in content_tables:
+            # 1. 定位表题起始页码
+            caption_pno = -1
             for pno in range(4, len(pdf)):
-                t = pdf[pno].get_text()
-                if f"表 {tid}" in t:
-                    for l in t.split('\n'):
-                        if l.strip().startswith(f"表 {tid}"):
-                            t_pno = pno + 1
-                            break
-                    if t_pno != -1:
+                for line in pdf[pno].get_text().split('\n'):
+                    line_c = clean_pdf_txt(line)
+                    if line_c.startswith(f"表{clean_pdf_txt(tid)}") and ("所示" not in line_c):
+                        caption_pno = pno + 1
                         break
-            if t_pno == -1:
-                all_tabs_ok = False
-                tab_issues.append(f"表 {tid} 未找到表题")
+                if caption_pno != -1:
+                    break
+
+            if caption_pno == -1:
+                all_tables_pass = False
+                table_failures.append(f"表 {tid}: 无法定位表题 (无法定位数据)")
+                continue
+
+            # 2. 提取表头特征词
+            hdr_cells = [clean_pdf_txt(c.text) for c in tbl.rows[0].cells if clean_pdf_txt(c.text)]
+
+            # 3. 逐行匹配实际数据行 (从 caption_pno 开始顺序向后扫描)
+            curr_pno = caption_pno
+            row_pages = []
+            missing_rows = []
+
+            for r_idx in range(1, len(tbl.rows)):
+                c0 = clean_pdf_txt(tbl.rows[r_idx].cells[0].text)
+                c1 = clean_pdf_txt(tbl.rows[r_idx].cells[1].text) if len(tbl.rows[r_idx].cells) > 1 else ""
+                kw = c0[:8] if len(c0) >= 3 else (c0 + c1)[:10]
+
+                found_pno = -1
+                for pno in range(curr_pno - 1, len(pdf)):
+                    if kw in pdf_page_texts[pno]:
+                        found_pno = pno + 1
+                        break
+
+                if found_pno == -1:
+                    missing_rows.append((r_idx, kw))
+                else:
+                    row_pages.append((r_idx, found_pno))
+                    curr_pno = found_pno
+
+            if missing_rows:
+                all_tables_pass = False
+                table_failures.append(f"表 {tid}: 无法定位数据 (缺失行: {missing_rows})")
+                continue
+
+            # 4. 验证分页合理性：表题必须与首行数据同页
+            first_row_pno = row_pages[0][1]
+            if caption_pno != first_row_pno:
+                all_tables_pass = False
+                table_failures.append(f"表 {tid}: 表格分页异常 (表题在第 {caption_pno} 页，首行在第 {first_row_pno} 页)")
+                continue
+
+            # 5. 跨页检查与续页表头验证
+            pages_spanned = sorted(list(set([caption_pno] + [p for _, p in row_pages])))
+            if len(pages_spanned) > 1:
+                # 跨页表格：验证后续各页是否包含重复表头
+                missing_cont_hdrs = []
+                for cont_page in pages_spanned[1:]:
+                    has_hdr = any(len(hc) >= 2 and hc[:6] in pdf_page_texts[cont_page - 1] for hc in hdr_cells)
+                    if not has_hdr:
+                        missing_cont_hdrs.append(cont_page)
+
+                if missing_cont_hdrs:
+                    all_tables_pass = False
+                    table_failures.append(f"表 {tid}: 续页表头缺失 (跨页 {pages_spanned}，第 {missing_cont_hdrs} 页缺少重复表头)")
+                else:
+                    table_reports.append(f"表 {tid}(跨第{pages_spanned[0]}-{pages_spanned[-1]}页,含续表头)")
             else:
-                norm_p_text = pdf[t_pno - 1].get_text().replace('\n', '').replace(' ', '')
-                if row_key not in norm_p_text:
-                    all_tabs_ok = False
-                    tab_issues.append(f"表 {tid} 在第 {t_pno} 页缺少数据行")
-        
-        self.log_result("F. PDF 分页", "PDF 正文其余 9 个三线表表题与首行数据同页起始 (无孤立表题)", all_tabs_ok,
-                        "全部 9 个三线表表题与数据行同页合规呈现" if all_tabs_ok else f"异常表格: {tab_issues}")
+                table_reports.append(f"表 {tid}(第{pages_spanned[0]}页)")
+
+        self.log_result("F. PDF 分页", "PDF 正文全部 10 个专业数据表逐行数据完整呈现、分页合理且跨页续表头合规", all_tables_pass,
+                        f"全部 10 个表格核验通过: {', '.join(table_reports)}" if all_tables_pass else f"异常表格: {'; '.join(table_failures)}")
 
         # 验证主要章节在 PDF 正文中的实际起始页码（跳过前 4 页封面与目录），并与目录页码比对
         def find_body_page(heading, sub_hint):

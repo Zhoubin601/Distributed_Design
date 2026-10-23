@@ -13,7 +13,7 @@ sequenceDiagram
     participant D as PostgreSQL
     participant P as 事件发布器
     participant G as 房间成员网关
-    C->>W: MOVE_TOKEN + operationId + expectedVersion
+    C->>W: MOVE_TOKEN + operationId + expectedObjectVersion
     W->>R: 转发已认证的操作意图
     R->>D: BEGIN；锁定房间权威记录
     R->>D: 检查 operationId、请求哈希、权限与租约 epoch
@@ -21,13 +21,13 @@ sequenceDiagram
     D-->>R: COMMIT 成功
     R-->>W: 返回已提交的权威结果
     P->>D: 扫描尚未发布的已提交事件
-    P-->>G: 发布 roomId + sequence 通知
-    G->>D: 读取事件并按接收者权限生成投影
-    G-->>C: 推送授权后的 ROOM_EVENT
+    P-->>G: 发布 roomId + 内部 roomSequence 唤醒通知
+    G->>D: 从该连接的 resumeCursor 扫描事件并按当前权限生成投影
+    G-->>C: 推送 ROOM_EVENT（deliverySequence、viewVersion、resumeCursor）
 ~~~
 
 **关键说明：**
 - 状态、事件和幂等结果必须在同一个数据库事务中提交。
 - 数据库提交后即使通知暂时失败，事件仍可由发布器重试或由客户端重连补发。
-- 通知可能重复；消费者以 roomId 与 sequence 去重。
+- 通知可能重复；网关以内部 roomSequence/eventId 去重，客户端以授权视图的 deliverySequence 检测可见流缺口。
 - WebSocket 发送成功不是数据库提交的替代品，也不是所有客户端均已收到的证明。

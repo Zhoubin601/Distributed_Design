@@ -198,6 +198,7 @@
 | docs/communication-protocol.md | 记录消息与接口的候选设计 | 正文只展示必要的通信类型和一条代表性时序，不列出全部字段定义 |
 | docs/technology-comparison.md | 按 Chapter 1–8 比较方案 | 挑选最能解释设计取舍的对比，不堆砌所有候选技术 |
 | docs/failure-scenarios.md | 故障场景与验收测试备忘 | 正文选取 2–4 个代表性故障说明，完整测试矩阵仅在确有需要时作为附录素材 |
+| docs/design-review-concurrent-token-move.md | 用同一标记的并发移动场景串联需求、架构、通信、同步、一致性与容错 | 作为核心逻辑审查参考；最终正文按篇幅提炼，不整篇复制 |
 | assets/diagrams/ | 可编辑 Mermaid 图源 | 只选最能支撑论点的图，最终由 Codex 统一渲染、编号和排版 |
 
 SQL 锁定细节、完整消息 JSON、租约续期参数、发布器重试参数、快照保留策略等属于进一步详细设计的内容，不作为当前报告的主线。

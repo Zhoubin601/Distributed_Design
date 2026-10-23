@@ -67,11 +67,11 @@ sequenceDiagram
     C->>S: ROLL_DICE（operationId=R1，规则=d20）
     S->>S: 验证身份、权限与骰子规则
     S->>D: 检查 R1，生成结果并保存结果、事件、操作记录
-    D-->>S: 提交成功（结果=17，sequence=205）
+    D-->>S: 提交成功（结果=17，内部 roomSequence=205）
     S--xC: COMMAND_RESULT（17）响应丢失
     P->>D: 读取已提交且待通知的事件
-    D-->>P: 掷骰事件 sequence=205，结果=17
-    P-->>R: 通知房间成员结果=17
+    D-->>P: 内部掷骰事件 roomSequence=205，结果=17
+    P-->>R: 网关扫描后按当前权限投影；客户端事件使用各自连续的 deliverySequence
     Note over C: 客户端超时，不知道操作是否提交
     C->>S: 使用同一个 operationId=R1 重试
     S->>D: 查询已提交的操作结果 R1

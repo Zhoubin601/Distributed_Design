@@ -3,6 +3,7 @@
 主装配脚本：执行全量课程设计报告生成
 """
 import os
+import sys
 import shutil
 import docx
 
@@ -23,8 +24,8 @@ from scratch_build_ch8_ch9_refs import (
 
 TEMPLATE_PATH = 'raw/课程设计模板.docx'
 OUTPUT_DIR = 'output'
-OUTPUT_FILE_1 = os.path.join(OUTPUT_DIR, 'Distributed_Design_Report_Draft_v1.docx')
-DUPLICATE_FILE = os.path.join(OUTPUT_DIR, '20261023-Distributed_Design_Report_Draft-v1.docx')
+OUTPUT_FILE_1 = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUTPUT_DIR, 'Distributed_Design_Report_Draft_v2.docx')
+DUPLICATE_FILE = os.path.join(OUTPUT_DIR, '20261023-Distributed_Design_Report_Draft-v2.docx')
 
 def main():
     print(">>> 正在加载原始课程设计模板...")

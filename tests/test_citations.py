@@ -95,7 +95,7 @@ def test_citations_correspondence_with_references():
     assert ref_keys == [str(i) for i in range(1, 16)]
     
     # 检查现有的实际交付文档中的所有引用编号
-    doc_path = "output/Distributed_Design_Report_Draft_v1.docx"
+    doc_path = "output/Distributed_Design_Report_Draft_v2.docx" if os.path.exists("output/Distributed_Design_Report_Draft_v2.docx") else "output/Distributed_Design_Report_Draft_v1.docx"
     assert os.path.exists(doc_path), f"交付文档不存在: {doc_path}"
     
     doc = docx.Document(doc_path)

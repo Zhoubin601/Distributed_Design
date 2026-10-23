@@ -50,6 +50,6 @@ def update_fields_and_export_pdf(docx_path, pdf_path):
         word.Quit()
 
 if __name__ == "__main__":
-    docx_file = "output/Distributed_Design_Report_Draft_v1.docx"
-    pdf_file = "output/Distributed_Design_Report_Draft_v1.pdf"
+    docx_file = sys.argv[1] if len(sys.argv) > 1 else "output/Distributed_Design_Report_Draft_v2.docx"
+    pdf_file = sys.argv[2] if len(sys.argv) > 2 else "output/Distributed_Design_Report_Draft_v2.pdf"
     update_fields_and_export_pdf(docx_file, pdf_file)

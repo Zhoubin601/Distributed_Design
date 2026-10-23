@@ -9,8 +9,8 @@ import re
 import docx
 import fitz  # PyMuPDF
 
-DOCX_PATH = "output/Distributed_Design_Report_Draft_v1.docx"
-PDF_PATH = "output/Distributed_Design_Report_Draft_v1.pdf"
+DOCX_PATH = "output/Distributed_Design_Report_Draft_v2.docx"
+PDF_PATH = "output/Distributed_Design_Report_Draft_v2.pdf"
 IMAGE_DIR = "assets/diagrams/images"
 
 EXPECTED_H1 = [
@@ -367,7 +367,9 @@ class ReportVerifier:
             return True
 
 if __name__ == '__main__':
-    verifier = ReportVerifier(DOCX_PATH, PDF_PATH)
+    docx_file = sys.argv[1] if len(sys.argv) > 1 else DOCX_PATH
+    pdf_file = sys.argv[2] if len(sys.argv) > 2 else PDF_PATH
+    verifier = ReportVerifier(docx_file, pdf_file)
     success = verifier.run_all()
     if not success:
         sys.exit(1)

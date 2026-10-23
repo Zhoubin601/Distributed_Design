@@ -1,0 +1,15 @@
+# 临时与系统生成文件
+Thumbs.db
+Desktop.ini
+.DS_Store
+~$*
+*.tmp
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 编辑器与系统配置
+.vscode/
+.idea/

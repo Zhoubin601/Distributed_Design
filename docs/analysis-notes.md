@@ -1,5 +1,7 @@
 # 任务深度分析与方案构想 (analysis-notes.md)
 
+> **状态警告：历史候选材料，已被当前设计基线取代。** 本文件较早版本提出过 CRDT/P2P、WebRTC、Kafka、Redis Redlock、应用层 Quorum 以及跨服务 2PC 等方案；这些内容不代表当前系统采用的技术，也不得直接拼入最终报告。当前以 `docs/plan.md`、`docs/technology-comparison.md`、`docs/system-design.md`、`docs/database-design.md`、`docs/communication-protocol.md` 和 `docs/design-consistency-review.md` 为准。未在这些文件中明确锁定的机制一律视为候选或待确认。
+
 ## 1. 任务性质与目标定位
 
 本任务为东北大学软件学院《分布式系统导论》（宋杰老师主讲）的期末大作业报告撰写。

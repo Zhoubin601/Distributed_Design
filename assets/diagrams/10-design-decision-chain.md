@@ -1,33 +1,18 @@
-# 图 10：从业务需求到分布式机制的设计链
+# 图 10：从业务需求到概要设计选择
 
-**用途：** 把核心业务需求、关键机制与最终可观察行为连接起来，避免报告只堆砌技术名词。  
-**建议报告位置：** 第 2 章结尾，或作为第 6–8 章的概览图。  
-**状态：** 规划图；机制细节以 docs/technology-comparison.md、docs/system-design.md、docs/database-design.md 和 docs/communication-protocol.md 为准。
+**用途：** 以简洁的逻辑链说明为什么采用当前方案。  
+**建议报告位置：** 可用于规划，不作为最终正文必选图。
 
 ~~~mermaid
 flowchart TD
-    NEED["业务需求：多人同时操作同一房间"]
-    AUTH["每房间一个权威写入顺序"]
-    TX["数据库事务提交状态、事件与幂等结果"]
-    ORDER["对象 version + 内部 roomSequence"]
-    PUSH["按权限投影并分配 deliverySequence"]
-    RECOVER["持久事件日志 + resumeCursor + 周期水位对账/快照"]
-    RETRY["operationId 幂等重试"]
-    PRIVACY["服务端按成员权限过滤状态"]
-
-    NEED --> AUTH
-    AUTH --> TX
-    TX --> ORDER
-    TX --> RETRY
-    TX --> PUSH
-    PUSH -->|"连接可能断开或通知可能丢失"| RECOVER
-    RECOVER -->|"按序补发或快照恢复"| PUSH
-    AUTH --> PRIVACY
-    PRIVACY --> PUSH
+    N1["多人共同操作同一房间"]
+    N2["需要共享状态与明确操作顺序"]
+    N3["客户端—服务器架构"]
+    N4["房间服务验证操作并确定权威顺序"]
+    N5["持久化已确认的状态变化"]
+    N6["向有权限的客户端传播更新"]
+    N7["断线后重新同步"]
+    N1 --> N2 --> N3 --> N4 --> N5 --> N6 --> N7
 ~~~
 
-**图示说明：**
-- 事务是权威状态与事件记录的提交边界。
-- object version 用于对象冲突检测，内部 roomSequence 用于服务端完整事件流排序，deliverySequence 用于客户端授权视图连续性，resumeCursor 用于恢复定位，operationId 用于重试去重。
-- WebSocket 是实时传播通道；持久事件日志与快照承担恢复职责。
-- 服务端权限过滤必须覆盖实时事件与恢复快照。
+**关键说明：** 图中是概要设计的因果关系，不代表必须引入独立消息中间件、分布式锁或复杂事件游标协议。

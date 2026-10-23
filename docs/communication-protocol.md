@@ -12,7 +12,7 @@
 - WebSocket 用于实时操作请求、操作结果通知和房间事件推送。
 - PostgreSQL 事务决定权威状态是否提交；WebSocket 消息发送成功不等于数据库提交成功，客户端收到消息也不代表消息已持久化。
 - 每次可重试的客户端写操作必须带稳定的 operationId；重试时复用原 ID。
-- 服务端为房间内每个已提交事件分配单调递增的 sequence。sequence 只在 roomId 范围内有意义。
+- 数据库内部 room_event.sequence（内部 roomSequence）为完整房间事件流排序，但不直接作为客户端可见的连续序号。服务端按当前权限生成投影后，为该授权视图流分配连续的 deliverySequence。
 - 任何面向客户端的事件，都必须先通过房间成员权限和可见性过滤。服务端内部规范事件不直接广播给所有玩家。
 
 ## 2. 逻辑接口总览
@@ -70,7 +70,7 @@
   "roomId": "room-uuid",
   "operationId": "operation-uuid",
   "status": "SUCCEEDED",
-  "sequence": 108,
+  "eventId": "event-uuid",
   "result": {
     "tokenId": "token-uuid",
     "x": 12.5,
@@ -95,7 +95,9 @@ status 只表示本次操作的权威处理结果：
 {
   "messageType": "ROOM_EVENT",
   "roomId": "room-uuid",
-  "sequence": 108,
+  "deliverySequence": 42,
+  "viewVersion": 3,
+  "resumeCursor": "opaque-resume-cursor",
   "eventId": "event-uuid",
   "operationId": "operation-uuid",
   "eventType": "TOKEN_MOVED",
@@ -108,14 +110,16 @@ status 只表示本次操作的权威处理结果：
 }
 ~~~
 
-这是经过权限过滤后的客户端事件示例。真实发送给玩家的 payload 由服务端按用户权限生成；例如隐藏区域中的标记不能通过事件载荷、快照或错误消息泄露给未授权玩家。
+这是经过权限过滤后的客户端事件示例。真实发送给玩家的 payload 由服务端按用户权限生成；例如隐藏区域中的标记不能通过事件载荷、快照或错误消息泄露给未授权玩家。deliverySequence 只在当前 roomId + viewVersion 的授权视图流中连续递增；resumeCursor 是不透明游标，不能让客户端反推出被过滤的内部事件数量。内部 roomSequence 不发送给普通客户端。
 
 客户端按以下规则处理：
 
-1. sequence 小于或等于本地 lastSequence：视为重复或过期事件，忽略。
-2. sequence 等于 lastSequence + 1：验证事件后应用，并推进 lastSequence。
-3. sequence 大于 lastSequence + 1：发现缺口，暂停应用后续依赖事件并请求补发或快照。
-4. 若事件无法通过结构或版本校验，不应静默跳过并继续声称状态完整；应重新同步并记录诊断信息。
+1. viewVersion 与当前视图不一致：停止应用该流，重新鉴权并请求当前权限下的快照。
+2. deliverySequence 小于或等于本地 lastDeliverySequence：视为重复或过期事件，忽略。
+3. deliverySequence 等于 lastDeliverySequence + 1：验证事件后应用，并推进 lastDeliverySequence。
+4. deliverySequence 大于 lastDeliverySequence + 1：当前授权视图流存在缺口，暂停后续依赖事件的应用，并使用最后确认的 resumeCursor 请求补发或快照。
+5. 定期比较 SYNC_WATERMARK 中的 latestDeliverySequence 与本地进度，以发现“最后一条通知丢失、之后没有新事件”的情况。不能用内部 roomSequence 的跳号直接判断客户端丢消息。
+6. 若事件无法通过结构或版本校验，不应静默跳过并继续声称状态完整；应重新同步并记录诊断信息。
 
 ## 4. REST 接口草案
 
@@ -195,7 +199,7 @@ POST /api/rooms/{roomId}/join
 
 ## 6. 断线重连协议
 
-客户端在成功应用事件后持久保存 lastSequence（可以先保存在当前浏览器会话；是否跨设备保存由产品需求决定）。
+客户端为当前授权视图维护 `lastDeliverySequence` 与 `resumeCursor`。游标绑定 roomId、当前成员和 viewVersion；它是服务端签发的不透明恢复位置，不直接暴露内部 roomSequence。
 
 ~~~mermaid
 sequenceDiagram
@@ -206,26 +210,24 @@ sequenceDiagram
     participant D as PostgreSQL
 
     C->>G: 连接并认证
-    C->>G: RESUME_FROM(roomId, lastSequence)
-    G->>R: 校验成员身份并定位当前协调者
-    R->>D: 查询当前序号、事件保留范围
-    alt 事件仍可补发
-        D-->>R: 返回缺失事件范围
-        R-->>G: 按序返回授权事件
-        G-->>C: ROOM_EVENT...
-    else 事件缺口过大
-        D-->>R: 返回可用快照位置
-        R-->>G: 快照投影 + 后续事件
-        G-->>C: ROOM_SNAPSHOT + ROOM_EVENT...
+    C->>G: RESUME_FROM(roomId, resumeCursor, lastDeliverySequence, viewVersion)
+    G->>R: 校验成员权限与当前 viewVersion
+    R->>D: 从游标之后扫描持久事件至当前水位
+    R->>R: 按当前权限过滤并分配连续 deliverySequence
+    alt 游标有效且视图未变化
+        R-->>G: 授权事件 + SYNC_COMPLETE
+        G-->>C: 按序发送 ROOM_EVENT 与新 resumeCursor
+    else 游标失效或权限视图变化
+        R->>D: 读取一致性快照及其内部 roomSequence
+        R-->>G: 当前权限下的快照投影 + 后续授权事件
+        G-->>C: ROOM_SNAPSHOT + ROOM_EVENT + SYNC_COMPLETE
     end
-    C-->>G: RESUME_ACK(lastSequence)
+    C-->>G: RESUME_ACK(lastDeliverySequence, viewVersion)
 ~~~
 
-**图 1：重连恢复消息流程。** 实际实现应避免在权限变化后把旧权限下的缓存快照原样发给用户。快照需要重新按当前权限生成或从安全的权限分区读取。
+**图 1：重连恢复消息流程。** 快照必须在当前权限下重新生成或从安全的权限分区读取。若成员角色或可见范围变化，旧 viewVersion 对应的游标失效，客户端必须替换本地状态，不能把旧权限下的快照与新视图简单合并。
 
-快照消息建议包含 roomId、snapshotSequence、schemaVersion、经当前权限过滤的状态投影，以及之后应接收的起始事件序号。
-
-收到快照后，客户端用它替换本地共享状态，并从 snapshotSequence + 1 开始应用后续事件。客户端不能把快照和旧本地状态简单合并，否则可能复活已经删除的对象或重新显示隐藏内容。
+恢复完成时的 `SYNC_COMPLETE` 与周期性的 `SYNC_WATERMARK` 都应包含 latestDeliverySequence、resumeCursor 和 viewVersion。只有当客户端已连续应用到 latestDeliverySequence 时，才可将返回的游标保存为新的恢复起点；若服务端水位更高，应继续补发。
 
 ## 7. 实时连接与发布语义
 
@@ -240,11 +242,12 @@ sequenceDiagram
 
 本系统不声称网络消息“恰好投递一次”。合理目标是：
 
-1. 权威状态、事件和操作结果在一个数据库事务中提交。
-2. 已提交事件通过待发布记录进行至少一次通知尝试。
-3. 通知可能重复或延迟，消费者按 roomId + sequence 去重。
-4. 通知缺失时，客户端按 lastSequence 从持久事件日志补发。
-5. 权限过滤在服务端执行；通知通道不能绕过可见性检查。
+1. 权威状态、内部 roomSequence、事件记录和操作结果在一个数据库事务中提交。
+2. 当前方案使用 room_event 的待发布字段重试通知；通知通道只负责提示网关检查新事件，不是客户端收齐事件的证明。
+3. 网关从每个连接的 resumeCursor 扫描持久事件，按当前权限生成投影，并为该视图分配连续 deliverySequence。
+4. 通知可能重复、延迟或丢失；按 eventId/内部 roomSequence 去重，客户端按 deliverySequence 检查授权视图流。
+5. 心跳或周期性对账发送 SYNC_WATERMARK，确保最后一条通知丢失且之后没有新事件时，客户端仍能发现落后并触发补发。
+6. 权限过滤在实时推送、补发和快照路径都执行；权限版本变化时使旧游标失效。
 
 ## 8. 安全与输入校验
 
@@ -284,6 +287,9 @@ sequenceDiagram
 | API-08 | 服务端数据库暂时不可用 | 不返回“已提交”结果；客户端可用原 operationId 重试 |
 | API-09 | 客户端快照版本不兼容 | 服务端协商兼容版本或要求完整重同步，不静默合并 |
 | API-10 | 旧协调者发送写请求 | 权威写入路径拒绝旧 epoch 的操作 |
+| API-11 | 房间中出现玩家无权查看的隐藏事件 | 客户端可见 deliverySequence 仍连续；不泄露隐藏事件载荷或内部事件数量 |
+| API-12 | 最后一条可见事件的通知丢失，之后没有新事件 | SYNC_WATERMARK/周期对账发现服务端 deliverySequence 更高，并补发缺失事件 |
+| API-13 | 成员权限或战争迷雾可见范围发生变化 | 旧 viewVersion/cursor 失效；服务端发送当前权限下的新快照 |
 
 ## 11. 待实现决策
 
@@ -291,4 +297,5 @@ sequenceDiagram
 2. 是否支持同一用户多个设备同时加入同一房间，以及它们的 lastSequence 如何分别维护。
 3. 掷骰规则的表达格式与随机数生成策略需要在业务规则设计中进一步定义。
 4. 地图上传、静态资源授权与文件限制取决于是否把用户上传纳入核心范围。
-5. 事件发布器可采用数据库 outbox 轮询；若后续改为专用消息队列，仍需保留持久事件与幂等语义。
+5. 当前建议用 room_event 的 published_at、publish_attempts 和 next_attempt_at 作为待发布重试队列；如未来改为独立 outbox 或专用消息队列，仍需保留持久事件、权限投影与幂等语义。
+6. deliverySequence 的连接级状态维护、resumeCursor 的签发/校验与 viewVersion 变化时的重置规则，需在实现前定稿。

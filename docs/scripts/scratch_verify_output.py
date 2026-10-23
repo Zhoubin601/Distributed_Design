@@ -50,12 +50,12 @@ def verify():
 
     # 3. 验证图表
     print("\n--- 3. 图表与图注验证 ---")
-    fig_captions = [p.text.strip() for p in doc.paragraphs if p.text.strip().startswith('图 ')]
-    print(f"正文图表（共 {len(fig_captions)} 个）：")
+    fig_captions = [p.text.strip() for p in doc.paragraphs if p.text.strip().startswith('图 ') and len(p.text.strip()) < 40]
+    print(f"正文图表图注（共 {len(fig_captions)} 个）：")
     for fc in fig_captions:
         print(f"  * {fc}")
 
-    tab_captions = [p.text.strip() for p in doc.paragraphs if p.text.strip().startswith('表 ')]
+    tab_captions = [p.text.strip() for p in doc.paragraphs if p.text.strip().startswith('表 ') and len(p.text.strip()) < 50]
     print(f"\n正文表格标题（共 {len(tab_captions)} 个）：")
     for tc in tab_captions:
         print(f"  * {tc}")
@@ -65,7 +65,10 @@ def verify():
     ref_list = [p.text.strip() for p in doc.paragraphs if p.text.strip().startswith('[') and ']' in p.text.strip() and p.style.name == 'List Paragraph']
     print(f"文末参考文献条目数：{len(ref_list)}")
     for r in ref_list:
-        print(f"  {r}")
+        try:
+            print(f"  {r}")
+        except UnicodeEncodeError:
+            print(f"  {r.encode('ascii', errors='replace').decode('ascii')}")
 
     # 5. 验证附录考核表
     print("\n--- 5. 附录表格（Table 3）结构验证 ---")

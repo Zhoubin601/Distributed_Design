@@ -24,7 +24,7 @@ from scratch_build_ch8_ch9_refs import (
 TEMPLATE_PATH = 'raw/课程设计模板.docx'
 OUTPUT_DIR = 'output'
 OUTPUT_FILE_1 = os.path.join(OUTPUT_DIR, 'Distributed_Design_Report_Draft_v1.docx')
-OUTPUT_FILE_2 = os.path.join(OUTPUT_DIR, '20261023-Distributed_Design_Report_Draft-v1.docx')
+DUPLICATE_FILE = os.path.join(OUTPUT_DIR, '20261023-Distributed_Design_Report_Draft-v1.docx')
 
 def main():
     print(">>> 正在加载原始课程设计模板...")
@@ -99,11 +99,16 @@ def main():
     print(">>> 正在更新附录考核表数据...")
     update_appendix_table(doc)
 
-    # 6. 保存文件
+    # 6. 保存文件并清理重复草稿
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     doc.save(OUTPUT_FILE_1)
-    shutil.copyfile(OUTPUT_FILE_1, OUTPUT_FILE_2)
-    print(f"\n>>> 成功生成第一版 Word 草稿：\n    1. {OUTPUT_FILE_1}\n    2. {OUTPUT_FILE_2}")
+    if os.path.exists(DUPLICATE_FILE):
+        try:
+            os.remove(DUPLICATE_FILE)
+            print(f">>> 已清理冗余重复副本：{DUPLICATE_FILE}")
+        except Exception as e:
+            print(f">>> 清理冗余副本失败: {e}")
+    print(f"\n>>> 成功生成 Word 报告：\n    {OUTPUT_FILE_1}")
 
     # 7. 快速自检
     doc_check = docx.Document(OUTPUT_FILE_1)

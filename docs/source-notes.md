@@ -116,3 +116,6 @@
 | Crossref 官方接口 | https://api.crossref.org/works/10.1145/358527.358537 ；https://api.crossref.org/works/10.1145/1435417.1435432 ；https://api.crossref.org/works/10.1007/978-3-642-24550-3_29 | 出版方登记书目交叉核对；不替代技术原文 |
 
 重要修正：Gray 文末提及早期三阶段协议，但不是本报告现代 3PC 非阻塞模型的主要依据；检查点结合日志回放应归为后向恢复。网络访问中的失败/限流没有记作成功验证，相关替代原文路径见核验表。
+
+## 2026-10-24 v4 要求符合性复核来源
+引用日期：2026-10-24。直接复读 raw/要求.txt、raw/测验方法.pptx（分组/评分/目录可调整/提交）、raw/课程设计模板.docx、raw/不允许修改附录.jpg，并打开 raw/Introduction to Distributed System-by JieSong NEU.pdf 抽核相关理论页。当前 Word/PDF 为 output/v4/20261024-misttable-distributed-design-v4；文献核验记录来自 docs/20261024-reference-support-audit-v1.md，本轮未新增外部来源。PPT 保留旧选题，按较新的要求.txt 和此前课堂确认选题 B；截止年份及更新通知资料未提供。详细证据见 docs/20261024-v4-recheck-v1/。

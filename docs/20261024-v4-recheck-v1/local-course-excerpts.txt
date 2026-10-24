@@ -1,0 +1,204 @@
+Physical page 1
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+DISTRIBUTED SYSTEMS
+Principles and Paradigms
+Second Edition
+ANDREW S. TANENBAUM
+MAARTEN VAN STEEN
+Chapter 1
+Introduction
+
+
+Physical page 155
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Client and Server Stubs
+Client Stub read()
+Server Stub read()
+Original read()
+
+
+Physical page 261
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Directory Services
+• Naming Systems: systems that support structured
+naming.
+• Directory services: attribute-based naming
+systems.
+– Entities have a set of associated attributes that
+can be used for searching
+
+
+Physical page 321
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Bully Algorithm (1982)
+• When any process notices that the coordinator is no
+longer responding to requests, it initiates an election.
+• A process, P, holds an election as follows:
+– P sends an ELECTION message to all processes with
+higher numbers.
+– If no one responds, P wins the election and becomes
+coordinator.
+– If one of the higher-ups answers, it takes over. P’s job
+is done.
+• If a process that was previously down comes back up, it
+holds an election. If it happens to be the highest-
+numbered process currently running, it will win the
+election and take over the coordinator's job.
+
+
+Physical page 346
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Continuous Consistency
+• They refer to three deviations as forming
+continuous consistency ranges
+– Numeric: deviation in numerical values between
+replicas
+– Staleness: deviation in staleness between replicas
+– Order: deviation with respect to the ordering of
+update operations
+• Absolute deviation (by |v-v'|)
+• Relative deviation (by |v-v'|/v)
+
+
+Physical page 347
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Consistency Unit
+• Conit (CONsistency uNIT): a conit specifies the
+unit over which consistency is to be measured.
+– For example, in our stock-exchange example,
+a conit could be defined as a record
+representing a single stock.
+
+
+Physical page 348
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Order = # uncommitted local updates; Numerical (#unseen remote updates,
+max dev. between remote tentative and local committed); gray = committed
+Committed
+x=2
+y=0
+Committed
+x=0
+y=0
+tentative
+Deviation
+x=0
+y=5
+Deviation
+x=6
+y=3
+order
+numerical
+init: x=0, y=0
+(Staleness, Numeric)
+(Staleness, Numeric)
+
+
+Physical page 349
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Granularites of conits (1)
+
+
+Physical page 350
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Granularites of conits (2)
+Tradeoffs:
+high traffic, false sharing if conit too large;
+too stale, overhead too great if conit too small.
+
+
+Physical page 370
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Monotonic Read Consistency
+• Monotonic-read consistency guarantees that if a
+process has seen a value of x at time t, it will
+never see an older version of x at a later time.
+If a process reads the value of a data item x, any
+successive read operation on x by that process
+will always return that same value or a more
+recent value.
+
+
+Physical page 498
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Three-Phase Commit (3PC)
+• A problem with the two-phase commit protocol is
+that when the coordinator has crashed,
+participants may not be able to reach a final
+decision.
+– Participants may need to remain blocked until
+the coordinator recovers.
+• Three-phase commit protocol (3PC) avoids
+blocking processes in the presence of fail-stop
+crashes.
+– 3PC it is not applied often in practice as the
+conditions under which 2PC blocks rarely occur
+
+
+Physical page 499
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Three-Phase Commit (3PC)
+• The states of the coordinator and each participant
+satisfy the following two conditions:
+– There is no single state from which it is
+possible to make a transition directly to either a
+COMMIT or an ABORT state.
+– There is no state in which it is not possible to
+make a final decision, and from which a
+transition to a COMMIT state can be made.
+
+
+Physical page 500
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Three-Phase Commit (3PC)
+• The
+coordinator
+starts
+with
+sending
+a
+VOTE_
+REQUEST message to all participants, after which it
+waits for incoming responses.
+• If any participant votes to abort the transaction, the
+final
+decision
+will
+be
+to
+abort
+as
+well,
+so
+the
+coordinator sends GLOBAL_ABORT.
+• When
+the
+transaction
+can
+be
+committed,
+a
+PREPARE_COMMIT message is sent.
+• Only after each participant has acknowledged it is
+now prepared to commit, will the coordinator send the
+final
+GLOBAL_COMMIT
+message
+by
+which
+the
+transaction is actually committed.
+
+
+Physical page 501
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Finite State Machine for 3PC
+•
+Observation: no node can be in INIT if any other node is in PRECOMMIT
+•
+If participant stuck in READY or PRECOMMIT, contact others
+– READY: if any in INIT or ABORT, then ABORT
+– PRECOMMIT: if majority in PRECOMMIT, then COMMIT else ABORT
+Coordinator
+Participant

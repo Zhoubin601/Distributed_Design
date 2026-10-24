@@ -92,3 +92,27 @@
 - 来源名称：课程理论课件；文件名：`raw/Introduction to Distributed System-by JieSong NEU.pdf`；引用日期：2026-10-24。直接抽查物理页 1、155、261、319、321、346–350、370，摘录留在 `docs/20261024-v3-recheck-v1/local-course-excerpts.txt`。
 - 来源名称：本地 v3、手动 v2 及远程旧版；文件名：`output/v3/20261024-misttable-distributed-design-v3.docx`、同名 PDF、`output/v2/Distributed_Design_Report_Draft_v2.docx`、`origin/main:output/Distributed_Design_Report_Draft_v2.docx`；引用日期：2026-10-24。本地 v3 无占位标记，远程旧版仍有 29 处；封面及附录人员值与手动 v2 一致。只记录核验结果，不在长期背景中重复保存个人信息。
 - 本轮网络操作仅更新 Git；没有新增外部理论资料，未逐篇联网核实全部参考文献。raw 和 output 审查前后文件哈希清单相同。
+
+## 2026-10-24 文献实质核验补记
+
+用户本轮明确授权实际访问 Owlbear Rodeo 并核实全部文献对论述的支持关系。以下均为本次引用/访问日期 **2026-10-24**，逐条位置、边界及修订见 `docs/20261024-reference-support-audit-v1.md`。
+
+| 来源名称 | 链接或文件名 | 核验用途 |
+|---|---|---|
+| 官方课件及英文第二版教材 | `raw/Introduction to Distributed System-by JieSong NEU.pdf`；`raw/00-Distributed System-Principle and Paradigms (2nd Edition).pdf` | [1,2]；物理页 498–501 的 3PC；教材印刷页 363–365 的恢复分类 |
+| Lamport 原文 | https://lamport.azurewebsites.net/pubs/time-clocks.pdf | [3]；偏序与逻辑时钟 |
+| Gifford 原文 | https://www.cs.sfu.ca/~vaughan/teaching/431/papers/gifford79.pdf | [4]；加权读写仲裁与版本 |
+| Ricart / Agrawala 原文 | https://courses.grainger.illinois.edu/cs425/fa2023/358527.ricart-agrawala.pdf | [5]；互斥、消息数及正确页码 9–17 |
+| Mattern 原文及作者元数据 | https://vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf ；https://vs.inf.ethz.ch/publ/bibtex.html?file=papers%2FVirtTimeGlobStates | [6]；向量时间及论文集名称 |
+| Fielding 学位论文 | https://www-test.ics.uci.edu/~fielding/pubs/dissertation/top.htm ；https://www-test.ics.uci.edu/~fielding/pubs/dissertation/net_arch_styles.htm | [7]；分层 C/S 风格 |
+| RFC Editor | https://www.rfc-editor.org/rfc/rfc6455 | [8]；WebSocket 双向通信能力 |
+| Owlbear 官网与官方文档 | https://www.owlbear.rodeo/ ；https://docs.owlbear.rodeo/docs/getting-started/ ；https://docs.owlbear.rodeo/docs/rooms/ ；https://docs.owlbear.rodeo/docs/fog/ | [9]；实际访问日期，房间/地图/标记/迷雾场景 |
+| Gray 原文、作者书目与出版社 | https://jimgray.azurewebsites.net/papers/dbos.pdf ；https://jimgray.azurewebsites.net/jimgraypublications.htm ；https://link.springer.com/chapter/10.1007/3-540-08755-9_9 | [10]；事务与 2PC，补全书目信息 |
+| Chandy / Lamport 原文 | https://lamport.azurewebsites.net/pubs/chandy.pdf | [11]；全局截面和通道状态，仅作理论对照 |
+| Vogels 期刊原件及作者公开版本 | https://15799.courses.cs.cmu.edu/fall2013/static/papers/p40-vogels.pdf ；https://www.allthingsdistributed.com/2008/12/eventually_consistent.html | [12]；实际读取期刊版 pp. 42、44 的客户端一致性及版本防回退 |
+| Shapiro 等原文及出版方 | https://perso.lip6.fr/Marc.Shapiro/papers/2011/CRDTs_SSS-2011.pdf ；https://link.springer.com/chapter/10.1007/978-3-642-24550-3_29 | [13]；有条件收敛及正确论文集名称 |
+| MIT 保存的 Chord 原文 | https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf | [14]；环、指位表、查找和动态节点 |
+| Birman / Joseph 原文及作者项目书目 | https://pages.cs.wisc.edu/~remzi/Classes/739/Papers/p47-birman.pdf ；https://www.cs.cornell.edu/Info/Projects/ISIS/ISISpapers.html | [15]；可靠组通信与交付顺序 |
+| Crossref 官方接口 | https://api.crossref.org/works/10.1145/358527.358537 ；https://api.crossref.org/works/10.1145/1435417.1435432 ；https://api.crossref.org/works/10.1007/978-3-642-24550-3_29 | 出版方登记书目交叉核对；不替代技术原文 |
+
+重要修正：Gray 文末提及早期三阶段协议，但不是本报告现代 3PC 非阻塞模型的主要依据；检查点结合日志回放应归为后向恢复。网络访问中的失败/限流没有记作成功验证，相关替代原文路径见核验表。

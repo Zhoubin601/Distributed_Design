@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-24",
+  "source": "D:\\2026Autumn Semester File\\分布式导论\\期末作业\\output\\v3\\20261024-misttable-distributed-design-v3.docx",
+  "source_sha256": "cbd77355424d1598ed083716a85339544da1aa49d23ffdcee5698dcb4945ce90",
+  "target": "D:\\2026Autumn Semester File\\分布式导论\\期末作业\\docs\\20261024-reference-audit-v1\\20261024-misttable-distributed-design-v4.docx",
+  "changes": [
+    {
+      "before": "系统采用分层客户端—服务器（Layered Client-Server）架构与事件通知相结合的风格 [1, 7]。系统整体划分为客户端层、接入层、应用与房间协作服务层、持久化与基础设施层四个逻辑层次。系统总体逻辑架构如图 1 所示。",
+      "after": "系统采用分层客户端—服务器（Layered Client-Server）架构。[1, 7] 在此基础上，本设计用事件通知传播房间状态。系统整体划分为客户端层、接入层、应用与房间协作服务层、持久化与基础设施层四个逻辑层次。系统总体逻辑架构如图 1 所示。"
+    },
+    {
+      "before": "系统采用‘请求—应答（Request-Reply）’与‘双向实时通信’相结合的通信架构 [1, 8]。不同业务场景下的通信方式对比如表 4-1 所示。",
+      "after": "系统将常规管理的请求—应答与实时协作的双向消息通道分开设计。[1] WebSocket 提供基于 TCP 的双向通信，可用于后者。[8] 不同业务场景下的通信方式对比如表 4-1 所示。"
+    },
+    {
+      "before": "系统采用全局唯一标识符（如 UUIDv4）作为业务实体的稳定内部名称 [1, 2]。UUID 具备极大的标识空间，支持在分布式节点上去中心化生成，避免了对中心自增发号器单点的强依赖。核心实体标识包括用户标识（userId）、房间内部标识（roomId）、标记标识（tokenId）与地图资源标识（mapId）。需要特别明确的是：UUIDv4 仅用于全局实体的内部引用与寻址，其随机性绝不代表安全授权机制；知晓或获取某个实体标识绝不等于获得操作权限，随机标识符不能替代服务端严格的会话身份认证与角色权限核验。",
+      "after": "命名设计遵循稳定标识与网络位置分离的原则。[1, 2] 本系统选择 UUIDv4 作为业务实体的内部标识，并由权威库唯一约束拒绝重复值。核心实体包括用户标识（userId）、房间内部标识（roomId）、标记标识（tokenId）与地图资源标识（mapId）。UUIDv4 用于内部引用与寻址，其随机性不能替代授权；获取某个实体标识不等于获得操作权限，服务端仍须核验会话身份、成员角色和对象权限。"
+    },
+    {
+      "before": "深入理论剖析与概念澄清：课件详细证明了 Lamport 逻辑时钟 [3]、Ricart-Agrawala 分布式互斥算法 [5] 与向量时钟 [6] 在解决缺乏物理时钟因果定序方面的经典地位。在此需要明确区分分布式理论模型与本系统的工程实现机制：",
+      "after": "理论概念对应：Lamport 逻辑时钟 [3] 说明因果先行与时间戳的关系，向量时钟 [6] 用于识别因果与并发，Ricart-Agrawala 算法 [5] 解决消息传递网络中的互斥。以下将理论模型与本系统工程机制区分说明："
+    },
+    {
+      "before": "协调服务故障时，网关依据心跳超时仅判断“疑似失联”，由候选实例在权威存储上原子争取该房间的新任期，成功者加载已提交状态后接管。每次写入都在同一事务内检查有效任期，拒绝旧实例；续租与到期判定采用受控服务端时间或一致性存储，不信任客户端时钟。租约有时钟及暂停假设，安全边界最终是存储的原子任期检查；权威存储不可达则暂停写入。该方案是概要设计，尚未通过自动接管或网络分区测试，不把超时、最高编号或路由修改本身当作唯一写入证明。[1, 2]",
+      "after": "依据课程的故障检测与恢复模型 [1, 2]，本设计在协调服务故障时仅将心跳超时视为“疑似失联”。候选实例在权威存储上原子争取该房间的新任期，成功者加载已提交状态后接管。每次写入都在同一事务内检查有效任期，拒绝旧实例；续租与到期判定采用受控服务端时间或一致性存储，不信任客户端时钟。租约有时钟及暂停假设，安全边界最终是存储的原子任期检查；权威存储不可达则暂停写入。该方案尚未通过自动接管或网络分区测试，不把超时、最高编号或路由修改本身当作唯一写入证明。"
+    },
+    {
+      "before": "3. 分布式两阶段提交（2PC）与三阶段提交（3PC）适用性论证：课件 Chapter 8 推导了两阶段提交（Two-Phase Commit, 2PC）与三阶段提交（3PC）在保障跨节点分布式事务原子性方面的机制与限制 [1, 10]。",
+      "after": "3. 分布式两阶段提交（2PC）与三阶段提交（3PC）适用性论证：课件 Chapter 8 及教材第 8.5 节介绍了 2PC 与 3PC 在保障跨节点事务原子提交方面的机制与限制。[1, 2]"
+    },
+    {
+      "before": "设计论证：2PC 面向多个独立事务参与者的原子提交，参与者在准备后若无法获知决定可能阻塞；3PC 增加预提交阶段，其非阻塞讨论依赖有界延迟等更强假设，网络分区或假设失效时不能据此保证安全且可用。[1, 10] 当前将房间状态、事件和幂等结果纳入同一权威库事务，数据库在正确持久化与隔离配置下承担 ACID，不涉及独立资源管理器的原子提交，故不自建 2PC/3PC。数据库复制及通知送达仍是另外的边界；单库事务不自动解决它们。",
+      "after": "设计论证：2PC 面向多个独立事务参与者的原子提交，参与者在准备后若无法获知决定可能阻塞。[1, 10] 3PC 增加预提交阶段，其非阻塞讨论依赖有界延迟等更强假设，网络分区或假设失效时不能据此保证安全且可用。[1, 2] 当前将房间状态、事件和幂等结果纳入同一权威库事务，数据库在正确持久化与隔离配置下承担 ACID，不涉及独立资源管理器的原子提交，故不自建 2PC/3PC。数据库复制及通知送达仍是另外的边界；单库事务不自动解决它们。"
+    },
+    {
+      "before": "4. 进程韧性、可靠组通信与恢复：课件 k 容错讨论在故障假设下允许 k 个节点失效所需的冗余；崩溃故障与拜占庭故障的副本数量条件不同，本项目未固定副本部署，不宣称达到某个 k 容错等级。房间成员加入、退出和权限变化可联系组视图及虚拟同步，但本系统采用权威服务生成不同授权流，不把该机制等同为所有组成员收到同一组消息的虚拟同步协议。持久事件日志、授权状态检查点与回放用于前向恢复，旧进程恢复后须重新核验任期；不回滚客户端画面就声称完成分布式故障恢复。[1, 15]",
+      "after": "4. 进程韧性、可靠组通信与恢复：课件 k 容错讨论在故障假设下允许 k 个节点失效所需的冗余；崩溃故障与拜占庭故障的副本数量条件不同，本项目未固定副本部署，不宣称达到某个 k 容错等级。[1] 文献 [15] 讨论故障条件下可靠组通信及事件交付顺序；本系统采用不同授权视图流，不将其等同于虚拟同步协议。恢复时先回到已提交的检查点，再回放持久日志，属于检查点结合日志的后向恢复。[1, 2] 旧进程恢复后须重新核验任期，不以客户端画面回滚代替分布式故障恢复。"
+    },
+    {
+      "before": "[5] RICART G, AGRAWALA A K. An optimal algorithm for mutual exclusion in computer networks [J]. Communications of the ACM, 1981, 24(1): 8-17.",
+      "after": "[5] RICART G, AGRAWALA A K. An optimal algorithm for mutual exclusion in computer networks [J]. Communications of the ACM, 1981, 24(1): 9-17."
+    },
+    {
+      "before": "[6] MATTERN F. Virtual time and global states of distributed systems [C]//Parallel and Distributed Algorithms. North-Holland, 1989: 215-226.",
+      "after": "[6] MATTERN F. Virtual time and global states of distributed systems [C]//Proceedings of the Workshop on Parallel and Distributed Algorithms. North-Holland, 1989: 215-226."
+    },
+    {
+      "before": "[9] Owlbear Rodeo. Owlbear Rodeo [EB/OL]. https://www.owlbear.rodeo/（网址见课堂选题资料）.",
+      "after": "[9] Owlbear Rodeo. Owlbear Rodeo [EB/OL]. [2026-10-24]. https://www.owlbear.rodeo/."
+    },
+    {
+      "before": "[10] GRAY J. Notes on data base operating systems [M]//Operating Systems. Berlin: Springer, 1978: 393-481.",
+      "after": "[10] GRAY J. Notes on data base operating systems [M]//Operating Systems: An Advanced Course. Lecture Notes in Computer Science, vol. 60. Berlin: Springer, 1978: 393-481."
+    },
+    {
+      "before": "[13] SHAPIRO M, PREGUIÇA N, BAQUERO C, et al. Conflict-free replicated data types [C]//Symposium on Self-Stabilizing Systems. Berlin: Springer, 2011: 386-400.",
+      "after": "[13] SHAPIRO M, PREGUIÇA N, BAQUERO C, et al. Conflict-free replicated data types [C]//Stabilization, Safety, and Security of Distributed Systems. SSS 2011. Lecture Notes in Computer Science, vol. 6976. Berlin: Springer, 2011: 386-400."
+    },
+    {
+      "before": "节点间对等同步，缺少中心权威，需依赖共识算法或 CRDT [13] 消解冲突",
+      "after": "需另行设计定序与合并；CRDT [13] 仅保证满足相应条件的数据类型收敛"
+    }
+  ],
+  "paragraph_count": 221,
+  "table_count": 13,
+  "inline_image_count": 7
+}

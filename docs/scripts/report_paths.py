@@ -9,7 +9,8 @@ def resolve_report_docx():
     override = os.environ.get('REPORT_DOCX')
     if override:
         return str(Path(override).resolve())
-    for folder, pattern in [('output/v3', '*-v3.docx'),
+    for folder, pattern in [('output/v4', '*-v4.docx'),
+                            ('output/v3', '*-v3.docx'),
                             ('output/v2', '*v2.docx'),
                             ('output', '*v2.docx'),
                             ('output/v1', '*v1.docx'),

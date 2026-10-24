@@ -1,0 +1,81 @@
+{
+  "checks": {
+    "v3_source_unchanged": true,
+    "headings_unchanged": true,
+    "paragraph_count_unchanged": true,
+    "table_count_unchanged": true,
+    "image_count_unchanged": true,
+    "cover_team_values_unchanged": true,
+    "appendix_values_unchanged": true,
+    "no_placeholders": true,
+    "all_14_reviewed_changes_present": true,
+    "15_reference_entries": true,
+    "reference_fonts_consistent_9pt": true,
+    "revised_body_citations_remain_superscript": true,
+    "reference_9_real_access_date": true,
+    "reference_5_pages_correct": true,
+    "reference_13_proceedings_correct": true,
+    "incorrect_forward_recovery_term_removed": true,
+    "pdf_26_pages": true,
+    "all_pdf_pages_nonempty": true,
+    "pdf_access_date_visible": true,
+    "pdf_backward_recovery_visible": true
+  },
+  "failed": [],
+  "pages": 26,
+  "font_counts": {
+    "KaiTi:9.0": 22,
+    "TimesNewRomanPSMT:9.0": 202,
+    "SimSun:10.5": 741,
+    "TimesNewRomanPS-BoldMT:16.0": 9,
+    "SimHei:16.0": 10,
+    "TimesNewRomanPS-BoldMT:22.0": 10,
+    "TimesNewRomanPS-BoldMT:14.0": 22,
+    "SimHei:14.0": 22,
+    "Cambria-Bold:16.0": 22,
+    "TimesNewRomanPSMT:10.5": 787,
+    "TimesNewRomanPSMT:7.0": 47,
+    "FangSong:10.5": 36,
+    "TimesNewRomanPS-BoldMT:10.5": 42,
+    "SimSun:9.5": 58,
+    "SimSun:9.0": 486,
+    "TimesNewRomanPS-BoldMT:9.5": 8,
+    "TimesNewRomanPS-BoldMT:12.0": 31,
+    "SimHei:12.0": 31,
+    "TimesNewRomanPSMT:6.0": 1,
+    "CambriaMath:10.5": 3
+  },
+  "reference_entries": [
+    "[1] 宋杰（修改）. 分布式系统导论（Introduction to Distributed System）[Z]. 东北大学软件学院教学课件, 2014（据课件页脚修改年份著录）.",
+    "[2] TANENBAUM A S, VAN STEEN M. Distributed systems: principles and paradigms [M]. 2nd ed. Upper Saddle River: Pearson Prentice Hall, 2007.",
+    "[3] LAMPORT L. Time, clocks, and the ordering of events in a distributed system [J]. Communications of the ACM, 1978, 21(7): 558-565.",
+    "[4] GIFFORD D K. Weighted voting for replicated data [C]//Proceedings of the seventh ACM symposium on Operating systems principles. 1979: 150-162.",
+    "[5] RICART G, AGRAWALA A K. An optimal algorithm for mutual exclusion in computer networks [J]. Communications of the ACM, 1981, 24(1): 9-17.",
+    "[6] MATTERN F. Virtual time and global states of distributed systems [C]//Proceedings of the Workshop on Parallel and Distributed Algorithms. North-Holland, 1989: 215-226.",
+    "[7] FIELDING R T. Architectural styles and the design of network-based software architectures [D]. Irvine: University of California, Irvine, 2000.",
+    "[8] FETTE I, MELNIKOV A. The WebSocket Protocol [R]. RFC 6455, 2011.",
+    "[9] Owlbear Rodeo. Owlbear Rodeo [EB/OL]. [2026-10-24]. https://www.owlbear.rodeo/.",
+    "[10] GRAY J. Notes on data base operating systems [M]//Operating Systems: An Advanced Course. Lecture Notes in Computer Science, vol. 60. Berlin: Springer, 1978: 393-481.",
+    "[11] CHANDY K M, LAMPORT L. Distributed snapshots: determining global states of distributed systems [J]. ACM Transactions on Computer Systems, 1985, 3(1): 63-75.",
+    "[12] VOGELS W. Eventually consistent [J]. Communications of the ACM, 2009, 52(1): 40-44.",
+    "[13] SHAPIRO M, PREGUIÇA N, BAQUERO C, et al. Conflict-free replicated data types [C]//Stabilization, Safety, and Security of Distributed Systems. SSS 2011. Lecture Notes in Computer Science, vol. 6976. Berlin: Springer, 2011: 386-400.",
+    "[14] STOICA I, MORRIS R, KARGER D, et al. Chord: A scalable peer-to-peer lookup service for internet applications [J]. ACM SIGCOMM Computer Communication Review, 2001, 31(4): 149-160.",
+    "[15] BIRMAN K P, JOSEPH T A. Reliable communication in the presence of failures [J]. ACM Transactions on Computer Systems, 1987, 5(1): 47-76."
+  ],
+  "files": {
+    "20261024-misttable-distributed-design-v4.docx": {
+      "sha256": "d51dbff58c17ada57b60e8db0898cd6bf56cf78b87a9cbd43079ef0b7b754b02",
+      "bytes": 2077417
+    },
+    "20261024-misttable-distributed-design-v4.pdf": {
+      "sha256": "d811e6b6fe105101c2b994239e7984bb08581429e5f3d1fe7cd4bceb83502d8f",
+      "bytes": 1520670
+    }
+  },
+  "delivery_paths": [
+    "D:\\2026Autumn Semester File\\分布式导论\\期末作业\\output\\v4\\20261024-misttable-distributed-design-v4.docx",
+    "D:\\2026Autumn Semester File\\分布式导论\\期末作业\\output\\v4\\20261024-misttable-distributed-design-v4.pdf"
+  ],
+  "raw_and_v3_unchanged": true,
+  "visual_review": "All 26 pages inspected through final contact sheets; reference page enlarged; no new clipping or table loss."
+}

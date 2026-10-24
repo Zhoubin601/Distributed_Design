@@ -1,0 +1,18 @@
+{
+  "source_sha256": "099a2cff400e41b794844c9c0738f79054d8a1d28baa77b26c527a1e388926b7",
+  "technical_body_and_references_unchanged": true,
+  "placeholder_count": 0,
+  "team_count": 4,
+  "team_roles": {
+    "leader": 1,
+    "deputies": 3,
+    "members": 0
+  },
+  "cover_and_appendix_names_ids_match": true,
+  "group_matches": true,
+  "all_8_appendix_scores_empty": true,
+  "appendix_structure_matches_template": true,
+  "paragraphs_with_latex_dollars": [
+    160
+  ]
+}

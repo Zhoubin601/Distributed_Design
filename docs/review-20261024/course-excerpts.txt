@@ -1,0 +1,116 @@
+PDF物理页 1
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+DISTRIBUTED SYSTEMS
+Principles and Paradigms
+Second Edition
+ANDREW S. TANENBAUM
+MAARTEN VAN STEEN
+Chapter 1
+Introduction
+
+
+PDF物理页 261
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Directory Services
+• Naming Systems: systems that support structured 
+naming.
+• Directory services: attribute-based naming 
+systems.
+– Entities have a set of associated attributes that 
+can be used for searching
+
+
+PDF物理页 319
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Election Algorithms
+• Many distributed algorithms require one process 
+to act as coordinator, initiator, or otherwise 
+perform some special role. 
+• In general, it does not matter which process takes 
+on this special responsibility, but one of them has 
+to do it. 
+• Algorithms for electing a coordinator 
+
+
+PDF物理页 321
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Bully Algorithm (1982) 
+• When any process notices that the coordinator is no 
+longer responding to requests, it initiates an election. 
+• A process, P, holds an election as follows:
+– P sends an ELECTION message to all processes with 
+higher numbers.
+– If no one responds, P wins the election and becomes 
+coordinator.
+– If one of the higher-ups answers, it takes over. P’s job 
+is done.
+• If a process that was previously down comes back up, it 
+holds an election. If it happens to be the highest-
+numbered process currently running, it will win the 
+election and take over the coordinator's job.
+
+
+PDF物理页 346
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Continuous Consistency
+• They refer to three deviations as forming 
+continuous consistency ranges
+– Numeric: deviation in numerical values between 
+replicas
+– Staleness: deviation in staleness between replicas
+– Order: deviation with respect to the ordering of 
+update operations
+• Absolute deviation (by |v-v'|)
+• Relative deviation (by |v-v'|/v) 
+
+
+PDF物理页 347
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Consistency Unit
+• Conit (CONsistency uNIT): a conit specifies the 
+unit over which consistency is to be measured. 
+– For example, in our stock-exchange example, 
+a conit could be defined as a record 
+representing a single stock.
+
+
+PDF物理页 370
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Monotonic Read Consistency
+• Monotonic-read consistency guarantees that if a 
+process has seen a value of x at time t, it will 
+never see an older version of x at a later time.
+If a process reads the value of a data item x, any 
+successive read operation on x by that process 
+will always return that same value or a more 
+recent value.
+
+
+PDF物理页 373
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Monotonic Writes Consistency
+• Completing a write operation means that the copy on 
+which a successive operation is performed reflects the 
+effect of a previous write operation by the same process, 
+no matter where that operation was performed. 
+• A write operation on a copy of item x is performed only if 
+that copy has been brought up to date by means of any 
+preceding write operation, which may have taken place on 
+other copies of x. 
+A write operation by a process on a data item x is 
+completed before any successive write operation 
+on x by the same process.
+
+
+PDF物理页 374
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+• Updating such a library is done by replacing one 
+or more functions, leading to a next version. 
+• With monotonic-write consistency, guarantees are 
+given that if an update is performed on a copy of 
+the library, all preceding updates will be 
+performed first. 
+• The resulting library will then indeed become the 
+most recent version and will include all updates 
+that have led to previous versions of the library.
+Example: Distributed Library (version control system)

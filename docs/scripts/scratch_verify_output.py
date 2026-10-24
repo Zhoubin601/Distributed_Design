@@ -9,9 +9,10 @@ import re
 import docx
 from docx.oxml.ns import qn
 import fitz  # PyMuPDF
+from report_paths import resolve_report_docx, resolve_report_pdf
 
-DOCX_PATH = "output/Distributed_Design_Report_Draft_v2.docx"
-PDF_PATH = "output/Distributed_Design_Report_Draft_v2.pdf"
+DOCX_PATH = resolve_report_docx()
+PDF_PATH = resolve_report_pdf()
 IMAGE_DIR = "assets/diagrams/images"
 
 EXPECTED_H1 = [
@@ -118,6 +119,20 @@ def clean_pdf_txt(s):
     s = re.sub(r'[ \t\r\n\(\)（）/\\:\-—_，。；、\u3000]', '', s)
     return s
 
+
+def has_real_value(value):
+    return bool(value.strip()) and not re.search(r'待填写|待确认|TODO|必填|选填', value, re.I)
+
+
+def find_body_page(pdf, heading, sub_hint=''):
+    """Find an exact heading line, excluding TOC entries, at any page position."""
+    target = clean_pdf_txt(heading)
+    for i, page in enumerate(pdf):
+        text = page.get_text()
+        if any(clean_pdf_txt(line) == target for line in text.splitlines()) and sub_hint in text:
+            return i+1
+    return -1
+
 class ReportVerifier:
     def __init__(self, docx_path, pdf_path):
         self.docx_path = docx_path
@@ -199,15 +214,17 @@ class ReportVerifier:
         self.log_result("C. 图表检查", "6 张设计图注均存在于正文中", len(fig_captions) == 6,
                         f"检测到 {len(fig_captions)} 个图注 (预期 6 个)")
 
-        # Check Image files
+        # 检查真正嵌入交付文档的图片，不能拿素材目录中的旧图替代。
         all_imgs_exist = True
         missing_imgs = []
         for fig_num, caption, filename in EXPECTED_FIGURES:
-            path = os.path.join(IMAGE_DIR, filename)
-            if not os.path.exists(path) or os.path.getsize(path) == 0:
+            caps = [p for p in doc.paragraphs if p.text.startswith(f'图 {fig_num}  ')]
+            embeds = caps[0]._p.getprevious().xpath('.//a:blip') if len(caps) == 1 else []
+            part = doc.part.related_parts.get(embeds[0].get(qn('r:embed'))) if embeds else None
+            if part is None or not part.blob:
                 all_imgs_exist = False
                 missing_imgs.append(filename)
-        self.log_result("C. 图表检查", "图注对应的物理图片文件全部存在且非空", all_imgs_exist,
+        self.log_result("C. 图表检查", "六张图注均绑定非空的嵌入图片", all_imgs_exist,
                         f"缺少文件: {missing_imgs}" if missing_imgs else "6 张图片文件完整")
 
         # Check Table count
@@ -329,10 +346,15 @@ class ReportVerifier:
 
         # Verify Row 2 contents
         r2 = [c.text.strip() for c in app_tbl.rows[2].cells]
-        has_group = (r2[0] != "")
+        has_group = has_real_value(r2[0])
         has_system = ("雾桌" in r2[1] or "MistTable" in r2[1])
         self.log_result("E. 附录表格", "附录表格填写了组名与系统全称", has_group and has_system,
                         f"组名: {repr(r2[0])}, 系统名: {repr(r2[1])}")
+        values = [c.text for t in doc.tables for row in t.rows for c in row.cells]
+        placeholders = [v for v in values if re.search(r'待填写|待确认|TODO', v, re.I)]
+        self.log_result('E. 提交完整', '团队表及正文无待填写占位符',
+                        not placeholders and not any(re.search(r'待填写|待确认|TODO', p.text, re.I) for p in doc.paragraphs),
+                        f'未填写单元格数: {len(placeholders)}')
 
         # Verify all scoring columns are empty
         scoring_indices = [4, 7, 10, 13, 16, 19, 22, 25]
@@ -377,7 +399,7 @@ class ReportVerifier:
 
         pdf = fitz.open(self.pdf_path)
         pdf_pages = len(pdf)
-        self.log_result("F. PDF 分页", "PDF 总页数达标 (报告规模正常)", pdf_pages >= 20,
+        self.log_result("F. PDF 分页", "PDF 可解析且包含页面（课程未规定页数门槛）", pdf_pages > 0,
                         f"PDF 实测总页数: {pdf_pages} 页")
 
         # Verify sections orientation
@@ -399,8 +421,12 @@ class ReportVerifier:
         p1_text = page1.get_text()
         has_topic = ("选题方向" in p1_text and "多人实时协作" in p1_text and "虚拟桌游平台" in p1_text)
         blocks = page1.get_text('blocks')
-        topic_b = [b for b in blocks if '虚拟桌游平台' in b[4]]
-        row1_b = [b for b in blocks if '组长' in b[4]]
+        # 选题单元格可拆成两个文本块；取 B 类标签以下、组长行以上的续行。
+        topic_start = [b for b in blocks if 'B：' in b[4] or 'B:' in b[4]]
+        row1_b = sorted([b for b in blocks if '组长(100%)' in b[4]], key=lambda b: b[1])
+        topic_b = [b for b in blocks if '虚拟桌游平台' in b[4]
+                   and topic_start and row1_b
+                   and b[1] >= topic_start[0][1]-1 and b[3] < row1_b[0][1]]
 
         extracted_blocks = bool(topic_b and row1_b)
         gap = 0.0
@@ -415,6 +441,12 @@ class ReportVerifier:
         self.log_result("F. PDF 分页", "PDF 第 1 页封面选题方向文本完整且选题方向文本块与下一行文本块垂直间距合理",
                         has_topic and extracted_blocks and space_ok,
                         cover_detail)
+        self.log_result('F. 封面分页', '完整封面信息表及学院名称同在第一页',
+                        all(label in p1_text for label in ['评定日期', '东北大学软件学院', '组长学号']),
+                        '检查封面末行，避免残留第二页')
+        dollar_pages = [i+1 for i, page in enumerate(pdf) if '$' in page.get_text()]
+        self.log_result('F. 公式文本', '未泄漏 LaTeX 美元符标记', not dollar_pages,
+                        f'异常页: {dollar_pages}')
 
         # 提取正文数据表供 PDF 分页核验
         content_tables = get_content_tables(docx_doc)
@@ -422,7 +454,7 @@ class ReportVerifier:
         # 验证 Table 6-1 在 PDF 中的实际分页与布局位置 (杜绝表题/表头孤立在页底，并核验全部 6 行数据)
         tab6_1_pno = -1
         target_6_1 = "表" + clean_pdf_txt("6-1")
-        for pno in range(4, len(pdf)):
+        for pno in range(len(pdf)):
             t = pdf[pno].get_text()
             for line in t.split('\n'):
                 line_c = clean_pdf_txt(line)
@@ -456,13 +488,13 @@ class ReportVerifier:
 
         has_all_6_rows = (len(missing_rows_6_1) == 0 and len(tbl_6_1.rows) == 7 if tbl_6_1 else False)
 
-        # 确认前一页 (Page 16) 底部未残留表 6-1 表题或表头孤立
-        p16_text = pdf[15].get_text() if len(pdf) >= 16 else ""
+        # 检查目标表的实际前一页，不能依赖旧版的固定物理页码。
+        p16_text = pdf[tab6_1_pno-2].get_text() if tab6_1_pno > 1 else ""
         p16_no_orphan_tab6_1 = ("表 6-1  分布式时钟" not in p16_text and "同步 / 互斥技术机制" not in p16_text)
 
-        tab6_1_layout_ok = (tab6_1_pno == 17 and has_caption_6_1 and has_header_6_1 and has_all_6_rows and p16_no_orphan_tab6_1)
+        tab6_1_layout_ok = (tab6_1_pno > 0 and has_caption_6_1 and has_header_6_1 and has_all_6_rows and p16_no_orphan_tab6_1)
         self.log_result("F. PDF 分页", "PDF 表 6-1 表题、表头与全部 6 行数据同页完整呈现 (无孤立滞留与截断)", tab6_1_layout_ok,
-                        f"表 6-1 位于第 {tab6_1_pno} 页整洁起始, 表题/表头与全部 6 行数据同页完整呈现, 第 16 页无孤立残留" if tab6_1_layout_ok else f"表 6-1 异常: pno={tab6_1_pno}, 表题={has_caption_6_1}, 表头={has_header_6_1}, 缺少行={missing_rows_6_1}, p16无残留={p16_no_orphan_tab6_1}")
+                        f"表 6-1 位于第 {tab6_1_pno} 页, 表题/表头及6行完整，实际前页无孤立残留" if tab6_1_layout_ok else f"表 6-1 异常: pno={tab6_1_pno}, 表题={has_caption_6_1}, 表头={has_header_6_1}, 缺少行={missing_rows_6_1}, 前页无残留={p16_no_orphan_tab6_1}")
 
         # 验证正文全部 10 个专业数据表逐行数据在 PDF 中呈现、分页顺序及跨页续表头合规性
         all_tables_pass = True
@@ -473,7 +505,7 @@ class ReportVerifier:
         for tid, cap, tbl in content_tables:
             # 1. 定位表题起始页码
             caption_pno = -1
-            for pno in range(4, len(pdf)):
+            for pno in range(len(pdf)):
                 for line in pdf[pno].get_text().split('\n'):
                     line_c = clean_pdf_txt(line)
                     if line_c.startswith(f"表{clean_pdf_txt(tid)}") and ("所示" not in line_c):
@@ -498,7 +530,8 @@ class ReportVerifier:
             for r_idx in range(1, len(tbl.rows)):
                 c0 = clean_pdf_txt(tbl.rows[r_idx].cells[0].text)
                 c1 = clean_pdf_txt(tbl.rows[r_idx].cells[1].text) if len(tbl.rows[r_idx].cells) > 1 else ""
-                kw = c0[:8] if len(c0) >= 3 else (c0 + c1)[:10]
+                # 完整首列避免将正文的 Chapter8 字样误认作 Chapter8FaultTolerance 数据行。
+                kw = c0 if c0 else c1
 
                 found_pno = -1
                 for pno in range(curr_pno - 1, len(pdf)):
@@ -545,28 +578,24 @@ class ReportVerifier:
         self.log_result("F. PDF 分页", "PDF 正文全部 10 个专业数据表逐行数据完整呈现、分页合理且跨页续表头合规", all_tables_pass,
                         f"全部 10 个表格核验通过: {', '.join(table_reports)}" if all_tables_pass else f"异常表格: {'; '.join(table_failures)}")
 
-        # 验证主要章节在 PDF 正文中的实际起始页码（跳过前 4 页封面与目录），并与目录页码比对
-        def find_body_page(heading, sub_hint):
-            for pno in range(4, len(pdf)):
-                t = pdf[pno].get_text()
-                if heading in t and sub_hint in t:
-                    return pno + 1
-            return -1
+        # 精确匹配标题行以排除目录，不假定正文从第5页才开始。
+        def locate(heading, sub_hint):
+            return find_body_page(pdf, heading, sub_hint)
 
-        ch1_page = find_body_page("1. 系统简介", "1.1 系统背景与业务定位")
-        ch2_page = find_body_page("2. 体系结构", "2.1 技术需求")
-        ch3_page = find_body_page("3. 进程", "3.1 技术需求")
-        ch4_page = find_body_page("4. 通信", "4.1 技术需求")
-        ch5_page = find_body_page("5. 命名", "5.1 技术需求")
-        ch6_page = find_body_page("6. 同步", "6.1 技术需求")
-        ch7_page = find_body_page("7. 一致性与复制", "7.1 技术需求")
-        ch8_page = find_body_page("8. 容错性与故障恢复", "8.1 技术需求")
-        ch9_page = find_body_page("9. 总结", "9.1 系统设计与分布式知识点对应回顾")
-        refs_page = find_body_page("参考文献", "东北大学软件学院教学课件")
+        ch1_page = locate("1. 系统简介", "1.1 系统背景与业务定位")
+        ch2_page = locate("2. 体系结构", "2.1 技术需求")
+        ch3_page = locate("3. 进程", "3.1 技术需求")
+        ch4_page = locate("4. 通信", "4.1 技术需求")
+        ch5_page = locate("5. 命名", "5.1 技术需求")
+        ch6_page = locate("6. 同步", "6.1 技术需求")
+        ch7_page = locate("7. 一致性与复制", "7.1 技术需求")
+        ch8_page = locate("8. 容错性与故障恢复", "8.1 技术需求")
+        ch9_page = locate("9. 总结", "9.1 系统设计与分布式知识点对应回顾")
+        refs_page = locate("参考文献", "宋杰")
         app_page = -1
-        for pno in range(4, len(pdf)):
+        for pno in range(len(pdf)):
             t = pdf[pno].get_text()
-            if "附录 (得分栏勿填)" in t:
+            if any(clean_pdf_txt(line) == clean_pdf_txt('附录 (得分栏勿填)') for line in t.splitlines()):
                 app_page = pno + 1
                 break
 
@@ -658,7 +687,7 @@ class ReportVerifier:
             print("\n>>> 结论：验收未通过！返回非零退出码。")
             return False
         else:
-            print("\n>>> 结论：全部自动化检查项 100% 验证通过！符合课程报告二稿定点修复规范！")
+            print("\n>>> 结论：全部结构、引用和分页自动检查通过；技术设计及视觉质量另行复核。")
             return True
 
 if __name__ == '__main__':

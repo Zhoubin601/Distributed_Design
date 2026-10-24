@@ -1,0 +1,43 @@
+{
+  "review_date": "2026-10-24",
+  "commit": "7d04aee",
+  "pytest": {
+    "passed": 12,
+    "failed": 0
+  },
+  "repository_verifier": {
+    "passed": 30,
+    "failed": 0
+  },
+  "officecli_schema": "passed",
+  "pdf_pages": 27,
+  "appendix_grid_merge_structure_matches_template": true,
+  "placeholder_occurrences": 29,
+  "cover_spill_page_2_text": "分布式系统导论-课程设计 \n2 \n \n评定日期 \n \n东北大学软件学院 \n",
+  "literal_dollar_pages": [
+    20
+  ],
+  "missing_terms_in_body": {
+    "Bully": true,
+    "选举算法": true,
+    "连续一致性": true,
+    "Conit": true,
+    "属性命名": true,
+    "单调写": true,
+    "写跟随读": true
+  },
+  "report_reference_1": [
+    "[1] 宋杰. 分布式系统导论 (Introduction to Distributed System) [Z]. 东北大学软件学院教学课件, 2024."
+  ],
+  "course_page_1_text": "Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014\nDISTRIBUTED SYSTEMS\nPrinciples and Paradigms\nSecond Edition\nANDREW S. TANENBAUM\nMAARTEN VAN STEEN\nChapter 1\nIntroduction\n",
+  "files": {
+    "output/Distributed_Design_Report_Draft_v2.docx": {
+      "bytes": 2437542,
+      "sha256": "63cece06183c0dd1ca9e02ddef58d8c3b47e643659c877317b4446853e7fd1bc"
+    },
+    "output/Distributed_Design_Report_Draft_v2.pdf": {
+      "bytes": 1489422,
+      "sha256": "5ca41adec81e9f043866a76d8b083de2488678a3de1faf4cee25a209030f01ea"
+    }
+  }
+}

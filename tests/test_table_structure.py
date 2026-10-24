@@ -19,6 +19,7 @@ from docx.oxml.ns import qn
 sys.path.insert(0, os.path.abspath('docs/scripts'))
 import scratch_report_builder_core as core
 import scratch_verify_output as verifier_mod
+from report_paths import resolve_report_docx, resolve_report_pdf
 
 def build_dummy_table(rows_count=3, cols_count=3):
     """使用报告核心构建函数构造标准三线表测试样例"""
@@ -100,7 +101,7 @@ def test_missing_cant_split_fails():
 
 def test_real_doc_content_tables_all_valid():
     """测试场景 5：验证实际报告文件 output/Distributed_Design_Report_Draft_v2.docx 中全部 10 张专业数据表结构"""
-    docx_path = "output/Distributed_Design_Report_Draft_v2.docx"
+    docx_path = resolve_report_docx()
     assert os.path.exists(docx_path), f"报告文件必须存在: {docx_path}"
     doc = docx.Document(docx_path)
     
@@ -120,7 +121,7 @@ def test_real_doc_content_tables_all_valid():
 
 def test_verifier_produces_fail_on_tampered_doc():
     """测试场景 6：验证 ReportVerifier 在属性缺失时确实产生明确 FAIL 结果，拒绝通过"""
-    docx_path = "output/Distributed_Design_Report_Draft_v2.docx"
+    docx_path = resolve_report_docx()
     doc = docx.Document(docx_path)
     content_tables = verifier_mod.get_content_tables(doc)
     assert len(content_tables) >= 1
@@ -132,7 +133,7 @@ def test_verifier_produces_fail_on_tampered_doc():
     assert tbl_hdr is not None
     hdr_trPr.remove(tbl_hdr)
     
-    verifier = verifier_mod.ReportVerifier(docx_path, "output/Distributed_Design_Report_Draft_v2.pdf")
+    verifier = verifier_mod.ReportVerifier(docx_path, resolve_report_pdf())
     verifier.verify_figures_and_tables(doc)
     
     # 检查是否记录了 FAIL

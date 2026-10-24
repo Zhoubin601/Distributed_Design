@@ -21,6 +21,7 @@ from docx.oxml.ns import qn
 sys.path.insert(0, os.path.abspath('docs/scripts'))
 import scratch_report_builder_core as core
 import scratch_build_ch8_ch9_refs as refs_builder
+from report_paths import resolve_report_docx
 
 def test_single_citation():
     """测试场景1：单个文献引用"""
@@ -95,7 +96,7 @@ def test_citations_correspondence_with_references():
     assert ref_keys == [str(i) for i in range(1, 16)]
     
     # 检查现有的实际交付文档中的所有引用编号
-    doc_path = "output/Distributed_Design_Report_Draft_v2.docx" if os.path.exists("output/Distributed_Design_Report_Draft_v2.docx") else "output/Distributed_Design_Report_Draft_v1.docx"
+    doc_path = resolve_report_docx()
     assert os.path.exists(doc_path), f"交付文档不存在: {doc_path}"
     
     doc = docx.Document(doc_path)

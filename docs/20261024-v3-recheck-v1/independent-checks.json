@@ -1,0 +1,213 @@
+{
+  "date": "2026-10-24",
+  "head": "7d04aee5cf98998150b092996b5f996d47b1ae31",
+  "origin_main": "7d04aee5cf98998150b092996b5f996d47b1ae31",
+  "reports": {
+    "local_docx_sha256": "cbd77355424d1598ed083716a85339544da1aa49d23ffdcee5698dcb4945ce90",
+    "local_pdf_sha256": "f159d9392bbeec03af0e98810936dff9eecb31de515e04781e03947f6c881521",
+    "remote_docx_sha256": "63cece06183c0dd1ca9e02ddef58d8c3b47e643659c877317b4446853e7fd1bc",
+    "local_equals_remote": false,
+    "remote_placeholder_occurrences": 29,
+    "local_placeholder_occurrences": 0,
+    "local_cover_same_as_manual_v2": true,
+    "local_appendix_values_same_as_manual_v2": true,
+    "appendix_grid_and_merges_match_template": true,
+    "appendix_no_added_paragraphs": true
+  },
+  "body_paragraph_properties": {
+    "<w:pPr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16sdtfl=\"http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\">\n  <w:keepNext/>\n  <w:spacing w:before=\"46\" w:after=\"46\"/>\n  <w:jc w:val=\"center\"/>\n</w:pPr>\n": 12,
+    "<w:pPr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16sdtfl=\"http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\">\n  <w:spacing w:before=\"46\" w:after=\"46\"/>\n</w:pPr>\n": 8,
+    "<w:pPr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16sdtfl=\"http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\">\n  <w:spacing w:before=\"46\" w:after=\"46\"/>\n  <w:ind w:firstLineChars=\"200\" w:firstLine=\"420\"/>\n</w:pPr>\n": 74,
+    "<w:pPr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16sdtfl=\"http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\">\n  <w:spacing w:before=\"46\" w:after=\"46\"/>\n  <w:jc w:val=\"center\"/>\n</w:pPr>\n": 5,
+    "<w:pPr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16sdtfl=\"http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\">\n  <w:spacing w:before=\"46\" w:after=\"46\"/>\n  <w:sectPr w:rsidR=\"00C40477\" w:rsidSect=\"008B2AAD\">\n    <w:headerReference w:type=\"even\" r:id=\"rId15\"/>\n    <w:headerReference w:type=\"default\" r:id=\"rId16\"/>\n    <w:footerReference w:type=\"even\" r:id=\"rId17\"/>\n    <w:footerReference w:type=\"default\" r:id=\"rId18\"/>\n    <w:headerReference w:type=\"first\" r:id=\"rId19\"/>\n    <w:footerReference w:type=\"first\" r:id=\"rId20\"/>\n    <w:pgSz w:w=\"11906\" w:h=\"16838\"/>\n    <w:pgMar w:top=\"1440\" w:right=\"1800\" w:bottom=\"1440\" w:left=\"1800\" w:header=\"851\" w:footer=\"992\" w:gutter=\"0\"/>\n    <w:cols w:space=\"425\"/>\n    <w:titlePg/>\n    <w:docGrid w:type=\"lines\" w:linePitch=\"312\"/>\n  </w:sectPr>\n</w:pPr>\n": 1
+  },
+  "document_defaults_xml": "<w:rPrDefault><w:rPr><w:rFonts w:ascii=\"Calibri\" w:eastAsia=\"宋体\" w:hAnsi=\"Calibri\" w:cs=\"Times New Roman\"/><w:kern w:val=\"2\"/><w:sz w:val=\"21\"/><w:szCs w:val=\"22\"/><w:lang w:val=\"en-US\" w:eastAsia=\"zh-CN\" w:bidi=\"ar-SA\"/></w:rPr></w:rPrDefault><w:pPrDefault/>",
+  "pdf": {
+    "pages": 26,
+    "page_sizes": [
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        595.5,
+        842.0
+      ],
+      [
+        842.0,
+        595.5
+      ]
+    ],
+    "text_chars_per_page": [
+      305,
+      3667,
+      3114,
+      1317,
+      716,
+      1236,
+      599,
+      1515,
+      889,
+      729,
+      868,
+      1015,
+      1221,
+      1401,
+      664,
+      1263,
+      1377,
+      1445,
+      919,
+      1084,
+      490,
+      1669,
+      837,
+      1386,
+      1988,
+      270
+    ],
+    "font_summary": {
+      "KaiTi:9.0": 22,
+      "TimesNewRomanPSMT:9.0": 201,
+      "SimSun:10.5": 742,
+      "TimesNewRomanPS-BoldMT:16.0": 9,
+      "SimHei:16.0": 10,
+      "TimesNewRomanPS-BoldMT:22.024999618530273": 10,
+      "TimesNewRomanPS-BoldMT:14.0": 22,
+      "SimHei:14.0": 22,
+      "Cambria-Bold:16.0": 22,
+      "TimesNewRomanPSMT:10.5": 785,
+      "TimesNewRomanPSMT:7.0": 44,
+      "FangSong:10.5": 36,
+      "TimesNewRomanPS-BoldMT:10.5": 42,
+      "SimSun:9.5": 58,
+      "SimSun:9.0": 487,
+      "TimesNewRomanPS-BoldMT:9.5": 8,
+      "TimesNewRomanPS-BoldMT:12.0": 31,
+      "SimHei:12.0": 31,
+      "CambriaMath:10.5": 3
+    }
+  },
+  "course_pages": 502,
+  "raw_and_output_unchanged_during_audit": true,
+  "input_hashes": {
+    "raw\\00-Distributed System-Principle and Paradigms (2nd Edition).pdf": "ed58159e29a9b1f8d51ffb905b70f43040b3b88b4d39d527f07ea7fdc98c1f03",
+    "raw\\00-分布式系统-原理与范型(第2版).pdf": "d541662e33db3ec8c31ae9e9e00677d205964c7a925e6d57879854323c062c36",
+    "raw\\Introduction to Distributed System-by JieSong NEU.pdf": "39fda12415cee59361393e7669ebfeb7cf3ae27b6c416956f414df5c3eb061d7",
+    "raw\\Owlbear.jpg": "4d213c34a355ed2a1049c64d3cee5f1a0e64b42e55e2b0952cef4dc15b6e9c91",
+    "raw\\penpot.jpg": "74b41b7673abaa7c323ff43c76cf5dc80f7e807f4e7534ef42ca8ac590bd1f20",
+    "raw\\不允许修改附录.jpg": "d150d604ce4f241da37de84156a0de24bf76a5ef99adc0657bbf7c926093f126",
+    "raw\\测验方法.pptx": "101ad0397ed292b02f147f4a40a7781e189b59a45be45be99f190b659a799f57",
+    "raw\\要求.txt": "cab1f0da87750f3f74fd975838404161f0a9532210a9b2efed878d41cdc9c8a9",
+    "raw\\课程设计模板.docx": "e7bed7f4d61c2111da99c5063b88b997edcd4794fc5bdd750e05bd3c55d8a3a4",
+    "output\\review\\validation-report.md": "64c469cebb6fffff31d0c375c4db0406baf8b0f2dfe361fa669125d5ca034bca",
+    "output\\v1\\Distributed_Design_Report_Draft_v1.docx": "b1c88e66004de8320910f4cb3ad44ca346c942c178a38a85c92bd52994d7bd36",
+    "output\\v1\\Distributed_Design_Report_Draft_v1.pdf": "4e9f54da8b44705b05a8bad91877ba4f22028003ffdae6dd81257441b128af21",
+    "output\\v2\\Distributed_Design_Report_Draft_v2.docx": "099a2cff400e41b794844c9c0738f79054d8a1d28baa77b26c527a1e388926b7",
+    "output\\v3\\20261024-misttable-distributed-design-v3.docx": "cbd77355424d1598ed083716a85339544da1aa49d23ffdcee5698dcb4945ce90",
+    "output\\v3\\20261024-misttable-distributed-design-v3.pdf": "f159d9392bbeec03af0e98810936dff9eecb31de515e04781e03947f6c881521",
+    "output\\review\\screenshots\\page_01_cover.png": "bbb2a845808baad366bb1735e1e6f4c9241adf390aefa1a9097320d6a0fba58a",
+    "output\\review\\screenshots\\page_03_toc_1.png": "24f5a77d41305960fdd6ecdb755b7b1eb70e3243bf29f37e74b8a5ce96f1a14a",
+    "output\\review\\screenshots\\page_04_toc_2.png": "9ad8759737647fd77d86fbbc33e82a3b7104f4b06383b97bb1dd25459f9750ab",
+    "output\\review\\screenshots\\page_06_table1_1.png": "2a1f68c2324d58b45ad874de8ec7edc3b66781f242e5acffe9f5a94c82f29ad5",
+    "output\\review\\screenshots\\page_08_fig1_architecture.png": "cab42ee87f93ed0804e252225ae1d3feda85e8f93fddd40d4cd232fb610589f3",
+    "output\\review\\screenshots\\page_10_fig2_room_assignment.png": "174baf7fb0e0ce036490cdd8d9774ec80f945cd5e254c6638d4173462bda01bf",
+    "output\\review\\screenshots\\page_12_fig3_token_sequence.png": "31d105f22b8febe960132935806c79aacf92fc913d525f053905207e29e82fb4",
+    "output\\review\\screenshots\\page_16_ch6_synchronization.png": "54d03182ad4b640fdf0c96ae3129adb64178d8850815761a075ad1a708d075f2",
+    "output\\review\\screenshots\\page_17_table6_1.png": "3d48f4065a22f1b40e5d0f728293c7f9b403efdd86eca1fe4885cf87a002b7d8",
+    "output\\review\\screenshots\\page_26_references.png": "a5e807b54867c7b5b7211ab2d4d805f3ac0e83533fbe62e000616abf433fab27",
+    "output\\review\\screenshots\\page_27_appendix.png": "957054300dbe147c58369def85e30c1d26381820c00ebe3dc5273dfa4931ed53"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "checks": {
+    "v2_unchanged": true,
+    "cover_team_table_unchanged": true,
+    "appendix_team_values_unchanged": true,
+    "appendix_merges_match_raw": true,
+    "appendix_uses_template_autofit": true,
+    "no_placeholders": true,
+    "no_math_or_code_markup": true,
+    "course_year_correct": true,
+    "all_repair_topics_present": true,
+    "no_new_cover_spill": true,
+    "all_pages_nonblank": true,
+    "pdf_page_count": 26
+  },
+  "tests": {
+    "passed": 21,
+    "failed": 0
+  },
+  "structural_checks": {
+    "passed": 33,
+    "failed": 0
+  },
+  "files": {
+    "docx": {
+      "bytes": 2077445,
+      "sha256": "cbd77355424d1598ed083716a85339544da1aa49d23ffdcee5698dcb4945ce90",
+      "output_path": "D:\\2026Autumn Semester File\\分布式导论\\期末作业\\output\\v3\\20261024-misttable-distributed-design-v3.docx"
+    },
+    "pdf": {
+      "bytes": 1521570,
+      "sha256": "f159d9392bbeec03af0e98810936dff9eecb31de515e04781e03947f6c881521",
+      "output_path": "D:\\2026Autumn Semester File\\分布式导论\\期末作业\\output\\v3\\20261024-misttable-distributed-design-v3.pdf"
+    }
+  }
+}

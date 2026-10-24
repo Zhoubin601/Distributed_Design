@@ -1,0 +1,568 @@
+PDF物理页 1
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+DISTRIBUTED SYSTEMS
+Principles and Paradigms
+Second Edition
+ANDREW S. TANENBAUM
+MAARTEN VAN STEEN
+Chapter 1
+Introduction
+
+
+PDF物理页 143
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Layered Protocols
+• Each layer gets services from layer immediately 
+below it.
+• Each layer provides services to the layer 
+immediately above it.
+• The interface definition specifies Service Data 
+Unit (SDU) from the layer above and the Protocol 
+Data Unit (PDU) given to the layer below 
+– PDU of one layer is the SDU of the layer below
+
+
+PDF物理页 144
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Encapsulated message 
+Note: Encapsulated message may be aggregated or fragmented by lower layer
+
+
+PDF物理页 151
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Types of Communication
+
+
+PDF物理页 155
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Client and Server Stubs
+Client Stub read()
+Server Stub read()
+Original read()
+
+
+PDF物理页 184
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Multimedia Streams
+• Discrete (representation) media – temporal 
+relationships not crucial
+– Text
+– Images
+– Code 
+• Continuous (representation) media – temporal 
+relationships between data items crucial to 
+correct interpretation
+– Audio
+– Video
+
+
+PDF物理页 185
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Data Streams
+• A data stream is a sequence of data units, it can 
+be applied to discrete as well as continuous 
+media. 
+– UNIX pipes or TCP/IP connections are typical 
+examples of (byte-oriented) discrete data 
+streams. 
+– Playing an audio file typically requires setting 
+up a continuous data stream between the file 
+and the audio device.
+
+
+PDF物理页 186
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Data Streams
+• The data items in a stream are transmitted one 
+after the other, but
+– Asynchronous (异步) transmission mode, there 
+are no further timing constraints on when 
+transmission of items should take place. 
+– Synchronous (同步) transmission mode, there is a 
+maximum end-to-end delay defined for each 
+unit. 
+– Isochronous (等步) transmission mode, there are 
+maximum and minimum end-to-end delay
+• Data units are transferred on time.
+• bounded (delay) jitter. 
+In this section, continuous data 
+streams using isochronous 
+transmission, simply as streams.
+
+
+PDF物理页 192
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Stream Synchronization
+• The simplest form of synchronization is that 
+between a discrete data stream and a continuous 
+data stream.
+– A slide show on the Web that has been 
+enhanced with audio
+• Synchronization between continuous data 
+streams.
+– Lip synchronization
+– Stereo synchronization (< 20 μs)
+
+
+PDF物理页 197
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Outline
+• Fundamentals
+• Remote Procedure Call
+• Message-oriented Communication
+• Stream-oriented Communication
+• Multicast Communication
+
+
+PDF物理页 198
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Multicast Communications
+• Multicast Communication: communication in 
+distributed systems is the support for sending 
+data to multiple receivers.
+• Layer at which is done
+– MAC layer
+– Network layer
+– Application layer (overlays)
+• Application layer multicast
+– Determine group membership
+– Determine overlay topology
+– Set up forwarding tables
+
+
+PDF物理页 217
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Outline
+• Terminology
+• Flat Naming
+– Simple Solutions
+– Home-Based (基于宿主位置) Approaches
+– Distributed Hash Tables (Chord)
+– Hierarchical Approaches
+• Structured Naming
+• Attribute-based Naming
+
+
+PDF物理页 219
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Simple Solutions
+• Forwarding pointers: Each time an entity moves, 
+it leaves behind a pointer telling where it has 
+gone to.
+– So long that locating that entity is prohibitively 
+expensive;
+– All intermediate locations in a chain will have to 
+maintain their part of the chain of forwarding 
+pointers as long as needed;
+– Vulnerability(脆弱性) to broken links.
+
+
+PDF物理页 223
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Home-Based Approaches
+The principle of Mobile IP
+
+
+PDF物理页 261
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Directory Services
+• Naming Systems: systems that support structured 
+naming.
+• Directory services: attribute-based naming 
+systems.
+– Entities have a set of associated attributes that 
+can be used for searching
+
+
+PDF物理页 319
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Election Algorithms
+• Many distributed algorithms require one process 
+to act as coordinator, initiator, or otherwise 
+perform some special role. 
+• In general, it does not matter which process takes 
+on this special responsibility, but one of them has 
+to do it. 
+• Algorithms for electing a coordinator 
+
+
+PDF物理页 321
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Bully Algorithm (1982) 
+• When any process notices that the coordinator is no 
+longer responding to requests, it initiates an election. 
+• A process, P, holds an election as follows:
+– P sends an ELECTION message to all processes with 
+higher numbers.
+– If no one responds, P wins the election and becomes 
+coordinator.
+– If one of the higher-ups answers, it takes over. P’s job 
+is done.
+• If a process that was previously down comes back up, it 
+holds an election. If it happens to be the highest-
+numbered process currently running, it will win the 
+election and take over the coordinator's job.
+
+
+PDF物理页 325
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Ring Algorithm
+Nodes 0 and 3 receive election messages, enter election. A node sends an 
+election message if it initiates or if it receives a message with a better 
+candidate.  Node 0 continues with 6 as the best candidate, while node 3 
+considers itself the best candidate.
+0
+1
+2
+3
+4
+5
+7
+6
+Elect 6
+Elect 3
+
+
+PDF物理页 346
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Continuous Consistency
+• They refer to three deviations as forming 
+continuous consistency ranges
+– Numeric: deviation in numerical values between 
+replicas
+– Staleness: deviation in staleness between replicas
+– Order: deviation with respect to the ordering of 
+update operations
+• Absolute deviation (by |v-v'|)
+• Relative deviation (by |v-v'|/v) 
+
+
+PDF物理页 347
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Consistency Unit
+• Conit (CONsistency uNIT): a conit specifies the 
+unit over which consistency is to be measured. 
+– For example, in our stock-exchange example, 
+a conit could be defined as a record 
+representing a single stock.
+
+
+PDF物理页 373
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Monotonic Writes Consistency
+• Completing a write operation means that the copy on 
+which a successive operation is performed reflects the 
+effect of a previous write operation by the same process, 
+no matter where that operation was performed. 
+• A write operation on a copy of item x is performed only if 
+that copy has been brought up to date by means of any 
+preceding write operation, which may have taken place on 
+other copies of x. 
+A write operation by a process on a data item x is 
+completed before any successive write operation 
+on x by the same process.
+
+
+PDF物理页 376
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Read-your-writes Consistency
+• A write operation is always completed before a successive 
+read operation by the same process, no matter where that 
+read operation takes place.
+The effect of a write operation by a process on 
+data item x will always be seen by a successive 
+read operation on x by the same process.
+
+
+PDF物理页 379
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Writes-follow-reads Consistency
+• Any successive write operation by a process on a data 
+item x will be performed on a copy of x that is up to date 
+with the value most recently read by that process.
+A write operation by a process on a data item x 
+following a previous read operation on x by the 
+same process is guaranteed to take place on the
+same or a more recent value of x that was read.
+
+
+PDF物理页 380
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+• Assume that a user first reads an article A. Then, 
+he reacts by posting a response B. 
+– Note that users who only read articles need not 
+require any specific client-centric consistency 
+model. 
+• By requiring writes-follow-reads consistency, B 
+will be written to any replica only after A has been 
+written as well. 
+• The writes-follow-reads consistency assures that 
+reactions to articles are stored at a local copy 
+only if the original is stored there as well.
+Example: BBS on Web
+
+
+PDF物理页 381
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+More recent value of x
+Value of x read at L2 does not reflect update at L1
+
+
+PDF物理页 382
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Outline
+• Data-centric Consistency Models
+• Client-centric Consistency Models
+• Replica Management
+• Consistency Protocols
+
+
+PDF物理页 383
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Placement
+• A key issue for any distributed system that 
+supports replication is to decide where, when, 
+and by whom replicas should be placed, and 
+subsequently which mechanisms to use for 
+keeping the replicas consistent. 
+– Placing replica servers
+– Placing content
+– Distributing content (update)
+
+
+PDF物理页 384
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Replica-Server Placement
+• Replica-server placement is concerned with 
+finding the best locations to place a server that 
+can host (part of) a data store. 
+• The best K out of N locations need to be selected 
+(K < N). 
+• There are various ways to compute the best 
+placement of replica servers
+– O(N2)  
+– O(N*max(logN, K))
+
+
+PDF物理页 405
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Partial Failure
+• An important goal in distributed systems design is 
+– it can automatically recover from partial failures 
+without seriously affecting the overall 
+performance
+– or, whenever a failure occurs, the distributed 
+system should continue to operate in an 
+acceptable way while repairs are being made, 
+– or, it should tolerate faults and continue to 
+operate to some extent even in their presence.
+
+
+PDF物理页 407
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Availability and Reliability
+• The two are not the same.
+– A system goes down for one millisecond every 
+hour, it has an availability of over 99.9999 
+percent, but is still highly unreliable.
+– A system that never crashes but is shut down 
+for two weeks every August has high reliability 
+but only 96 percent availability.
+
+
+PDF物理页 409
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Failure Models
+or can not (hang)
+Performance failure 
+The serious type of failure 
+The most serious type of failure 
+
+
+PDF物理页 414
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Outline
+• Basic Concepts
+• Process Resilience
+– Processes Group and k-Fault Tolerant
+– Distributed Agreement
+– Failure Detection
+• Reliable Client-server Communication
+• Reliable Group Communication
+• Recovery
+• Distributed Commit
+
+
+PDF物理页 419
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Distributed Agreement (协定)
+• Synchronous versus asynchronous systems.
+• Communication delay is bounded or not.
+• Message delivery is ordered (reliable) or not.
+• Message transmission is done through unicasting 
+or multicasting.
+The general goal of distributed agreement algorithms is 
+to have all the non-faulty processes reach consensus(一致)
+on some issue, and to establish that consensus within a 
+finite number of steps. 
+
+
+PDF物理页 447
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Problems
+• ACK implosion
+– A receiver returns a feedback message only to 
+inform the sender it is missing a message.
+– NACK but not ACK, thinking how a node know 
+the message in missing?
+• Buffer
+– Be forced to keep a message in its history 
+buffer forever, do not know when it should be 
+removed. 
+– Sender has to remove a message from its 
+history to prevent the buffer from overflowing
+
+
+PDF物理页 451
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Hierarchical Feedback Control
+• A single sender that needs to multicast messages to a 
+very large group of receivers. 
+– The group of receivers is partitioned into a number of 
+subgroups, which are subsequently organized into a 
+tree.
+• Each subgroup appoints a local coordinator which is 
+responsible for handling retransmission requests of 
+receivers contained in its subgroup. The local coordinator 
+will thus have its own history buffer. 
+• If the coordinator itself has missed a message m, it asks 
+the coordinator of the parent subgroup to retransmit m.
+• The main problem with hierarchical solutions is the 
+construction of the tree
+
+
+PDF物理页 454
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Group View
+• Group view is uniquely associated to a multicast 
+message m, it is a list of processes to which m
+should be delivered.
+• Processes on that list all agree that m should be 
+delivered to each one of them and to no other 
+process.
+• BUT, how about the Group View is changed?
+– Assume that while the multicast is taking place, 
+another process joins or leaves the group.
+
+
+PDF物理页 470
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Checkpoint based Rollback (1)
+• Can't have a received message that wasn't sent!
+
+
+PDF物理页 471
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Checkpoint based Rollback (2)
+P2 crashes, rolls back to C23, but this requires P1 to return 
+to C14, which causes P2 to return to C22, causing P1 to 
+return to C13. Now we are OK, and the system can 
+resume. 
+C23
+C11
+C12
+C13
+C14
+C22
+C23
+C21
+C20
+C10
+
+
+PDF物理页 472
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Independent Checkpoints
+The domino effect, a.k.a. cascading rollbacks.
+P2 crashes, rolls back to C23, but this requires P1 to
+return to C13, which causes P2 to return to C22 (due to
+m), causing P1 to return to C12 (due to m'). Now P2 has
+to return to C21, then P1 has to return to C11, ... until both
+are at initial state!
+C11
+C12
+C13
+C10
+C22
+C23
+C21
+C20
+
+
+PDF物理页 473
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Globally Coordinate Checkpoint
+• Globally Coordinate Checkpoint is to solve the 
+problems of cascading rollbacks.
+– Coordination requires global synchronization, 
+which may introduce performance problems. 
+• Independent Checkpoints have the problems of:
+– Computing the recovery line.
+– Each local storage needs to be cleaned up 
+periodically
+
+
+PDF物理页 474
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Message Logging
+• If the transmission of messages can be replayed, 
+we can still reach a globally consistent state but 
+without having to restore that state from stable 
+storage. 
+• A checkpointed state is taken as a starting point, 
+and all messages that have been sent since are 
+simply retransmitted and handled accordingly.
+
+
+PDF物理页 475
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Piecewise Deterministic Model (分段确定模式)
+• The execution of each process is assumed to 
+take place as a series of intervals in which events 
+take place.
+• An interval can be replayed with a known result, 
+that is, in a completely deterministic way, provided 
+it is replayed starting with the same 
+nondeterministic event as before.
+
+
+PDF物理页 476
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Incorrect replay of messages after 
+recovery
+An orphan process is a process that survives the crash 
+of another process, but whose state is inconsistent with 
+the crashed process after its recovery.
+
+
+PDF物理页 477
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Outline
+• Basic Concepts
+• Process Resilience
+• Reliable Client-server Communication
+• Reliable Group Communication
+• Recovery
+• Distributed Commit
+
+
+PDF物理页 478
+Tanenbaum & Van Steen, Distributed Systems: Principles and Paradigms, 2e, (c) 2007 Prentice-Hall, Inc. All rights reserved . ISBN 0-13-239227-5. Modified by Jie Song, Northeastern University, China, 2014
+Distributed Commit
+• The distributed commit problem involves having 
+an operation being performed by each member of 
+a process group, or none at all. 
+• Distributed commit is often established by means 
+of a coordinator and participants.
+– Coordinator tells all other processes that are 
+also involved, called participants, 
